@@ -36,15 +36,16 @@ export function TikTokPreview({ state, onThemeToggle }: Props) {
         {/* Content */}
         <div className="flex-1 min-w-0 pr-6">
           <div className="flex flex-col mb-1">
-            {isReply && (
-               <span className={`text-[11px] font-bold ${mutedText} mb-0.5 max-w-[200px] truncate`}>
-                 Balas ke Kreator Keren
-               </span>
-            )}
             <div className="flex items-center mt-0.5">
-              <span className={`text-[13px] font-bold ${isDark ? 'text-neutral-300' : 'text-gray-900'} mr-1.5 hover:underline cursor-pointer truncate`}>
-                {state.username}
-              </span>
+              {isReply ? (
+                <span className={`text-[13px] font-bold ${mutedText} mr-1.5 truncate`}>
+                  Balas {state.username}
+                </span>
+              ) : (
+                <span className={`text-[13px] font-bold ${isDark ? 'text-neutral-300' : 'text-gray-900'} mr-1.5 hover:underline cursor-pointer truncate`}>
+                  {state.username}
+                </span>
+              )}
               {state.isVerified && (
                 <div className="bg-[#20D5EC] rounded-full w-3.5 h-3.5 flex items-center justify-center shrink-0">
                   <svg className="w-2.5 h-2.5 text-white" viewBox="0 0 24 24" fill="currentColor">
