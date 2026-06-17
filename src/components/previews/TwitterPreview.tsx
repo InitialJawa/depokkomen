@@ -1,0 +1,106 @@
+import React from 'react';
+import { CommentState } from '../../types';
+import { MessageCircle, Repeat2, Heart, BarChart3, Upload, Moon, Sun } from 'lucide-react';
+import { renderFormattedText } from '../../utils';
+
+interface Props {
+  state: CommentState;
+  onThemeToggle?: () => void;
+}
+
+export function TwitterPreview({ state, onThemeToggle }: Props) {
+  const isDark = state.theme === 'dark';
+  
+  const bgColor = isDark ? 'bg-black' : 'bg-white';
+  const borderColor = isDark ? 'border-gray-800' : 'border-gray-200';
+  const textColor = isDark ? 'text-[#E7E9EA]' : 'text-[#0F1419]';
+  const nameColor = isDark ? 'text-white' : 'text-[#0F1419]';
+  const mutedColor = isDark ? 'text-[#71767B]' : 'text-[#536471]';
+
+  return (
+    <div className={`relative group w-full ${bgColor} p-4 text-left font-sans ${nameColor} border ${borderColor}`}>
+      {onThemeToggle && (
+        <button 
+          onClick={onThemeToggle}
+          className="absolute -right-12 top-0 p-2 rounded-full bg-[#141414] hover:bg-[#2D2D2D] border border-[#2D2D2D] text-gray-400 hover:text-white transition-colors opacity-0 group-hover:opacity-100"
+          title="Toggle Theme"
+        >
+          {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+        </button>
+      )}
+      <div className="flex items-start">
+        {/* Avatar */}
+        <img src={state.avatarUrl} alt="Avatar" className="w-10 h-10 rounded-full object-cover mr-3 bg-neutral-800 shrink-0" />
+        
+        {/* Content */}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center text-[15px] mb-0.5">
+            <span className={`font-bold ${nameColor} mr-1 truncate hover:underline cursor-pointer`}>
+              {state.username}
+            </span>
+            {state.isVerified && (
+               <svg className="w-[18px] h-[18px] text-[#1D9BF0] mr-1 shrink-0" viewBox="0 0 24 24" fill="currentColor">
+                 <path d="M22.5 12.5c0-1.58-.875-2.95-2.148-3.6.154-.435.238-.905.238-1.4 0-2.21-1.71-3.998-3.918-3.998-.47 0-.92.084-1.336.25C14.818 2.415 13.51 1.5 12 1.5s-2.816.917-3.337 2.25c-.416-.165-.866-.25-1.336-.25-2.21 0-3.918 1.79-3.918 4 0 .495.084.965.238 1.4-1.273.65-2.148 2.02-2.148 3.6 0 1.46.74 2.746 1.865 3.45-.065.29-.092.593-.092.895 0 2.21 1.71 3.998 3.918 3.998.47 0 .92-.084 1.336-.25C8.818 21.585 10.126 22.5 12 22.5c1.516 0 2.816-.917 3.337-2.25.416.165.866.25 1.336.25 2.21 0 3.918-1.79 3.918-4 0-.302-.027-.605-.092-.895 1.124-.704 1.865-1.99 1.865-3.45zm-10.46 4.38l-4.24-4.24 1.41-1.41 2.83 2.83 6.36-6.36 1.41 1.41-7.77 7.77z"/>
+               </svg>
+            )}
+            <span className={`${mutedColor} truncate`}>
+              {state.handle}
+            </span>
+            <span className={`${mutedColor} mx-1`}>·</span>
+            <span className={`${mutedColor} hover:underline cursor-pointer shrink-0`}>
+              {state.timestamp.replace(' lalu', '')}
+            </span>
+          </div>
+          
+          <div className={`text-[15px] leading-normal break-words whitespace-pre-wrap mb-3 ${textColor}`}>
+            {renderFormattedText(state.commentText)}
+          </div>
+          
+          {/* Action Bar */}
+          <div className={`flex items-center justify-between ${mutedColor} max-w-md`}>
+            <div className="flex items-center group cursor-pointer">
+              <div className="p-2 -mx-2 rounded-full group-hover:bg-[#1D9BF0]/10 group-hover:text-[#1D9BF0] transition">
+                <MessageCircle className="w-[18px] h-[18px]" strokeWidth={2} />
+              </div>
+              <span className="text-[13px] ml-1 group-hover:text-[#1D9BF0]">{state.replyCount}</span>
+            </div>
+            
+            <div className="flex items-center group cursor-pointer">
+              <div className="p-2 -mx-2 rounded-full group-hover:bg-[#00BA7C]/10 group-hover:text-[#00BA7C] transition">
+                <Repeat2 className="w-[18px] h-[18px]" strokeWidth={2} />
+              </div>
+              <span className="text-[13px] ml-1 group-hover:text-[#00BA7C]">{state.retweetCount}</span>
+            </div>
+            
+            <div className="flex items-center group cursor-pointer">
+              <div className="p-2 -mx-2 rounded-full group-hover:bg-[#F91880]/10 group-hover:text-[#F91880] transition">
+                <Heart className="w-[18px] h-[18px]" strokeWidth={2} />
+              </div>
+              <span className="text-[13px] ml-1 group-hover:text-[#F91880]">{state.likeCount}</span>
+            </div>
+            
+            <div className="flex items-center group cursor-pointer">
+              <div className="p-2 -mx-2 rounded-full group-hover:bg-[#1D9BF0]/10 group-hover:text-[#1D9BF0] transition">
+                <BarChart3 className="w-[18px] h-[18px]" strokeWidth={2} />
+              </div>
+              <span className="text-[13px] ml-1 group-hover:text-[#1D9BF0]">{state.viewCount}</span>
+            </div>
+            
+            <div className="flex items-center group cursor-pointer">
+              <div className="p-2 -mx-2 rounded-full group-hover:bg-[#1D9BF0]/10 group-hover:text-[#1D9BF0] transition">
+                <Upload className="w-[18px] h-[18px]" strokeWidth={2} />
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        {/* Top right menu icon dummy */}
+        <div className={`ml-2 shrink-0 p-2 -mr-2 rounded-full ${isDark ? 'hover:bg-white/10' : 'hover:bg-black/5'} cursor-pointer`}>
+           <svg className={`w-[18px] h-[18px] ${mutedColor}`} fill="currentColor" viewBox="0 0 24 24">
+             <path d="M3 12c0-1.1.9-2 2-2s2 .9 2 2-.9 2-2 2-2-.9-2-2zm9 2c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm7 0c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2z"/>
+           </svg>
+        </div>
+      </div>
+    </div>
+  );
+}
