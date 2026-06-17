@@ -29,7 +29,9 @@ export function TikTokPreview({ state, onThemeToggle }: Props) {
         )}
 
         {/* Avatar */}
-        <img src={state.avatarUrl} alt="Avatar" className="w-9 h-9 rounded-full object-cover mr-3 bg-neutral-800 shrink-0" />
+        {state.avatarUrl && (
+          <img src={state.avatarUrl} alt="Avatar" className="w-9 h-9 rounded-full object-cover mr-3 bg-neutral-800 shrink-0" />
+        )}
         
         {/* Content */}
         <div className="flex-1 min-w-0 pr-6">
@@ -57,14 +59,16 @@ export function TikTokPreview({ state, onThemeToggle }: Props) {
             {renderFormattedText(state.commentText)}
           </p>
           
-          <div className="flex items-center mt-2 space-x-4">
-            <span className={`text-[13px] ${isDark ? 'text-neutral-500' : 'text-gray-500'}`}>
-              {state.timestamp}
-            </span>
-            <button className={`text-[13px] ${isDark ? 'text-neutral-500 hover:text-neutral-300' : 'text-gray-500 hover:text-gray-700'} font-semibold tracking-wide`}>
-              Balas
-            </button>
-          </div>
+          {!isReply && (
+            <div className="flex items-center mt-2 space-x-4">
+              <span className={`text-[13px] ${isDark ? 'text-neutral-500' : 'text-gray-500'}`}>
+                {state.timestamp}
+              </span>
+              <button className={`text-[13px] ${isDark ? 'text-neutral-500 hover:text-neutral-300' : 'text-gray-500 hover:text-gray-700'} font-semibold tracking-wide`}>
+                Balas
+              </button>
+            </div>
+          )}
         </div>
         
         {/* Like Button */}

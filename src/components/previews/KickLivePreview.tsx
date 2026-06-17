@@ -14,13 +14,15 @@ export function KickLivePreview({ state, onThemeToggle }: Props) {
   const borderColor = state.hideLiveBackground ? 'border-transparent' : (isDark ? 'border-[#1E232B]' : 'border-gray-200');
   const textColor = isDark ? 'text-white' : 'text-black';
   const containerClasses = state.hideLiveBackground 
-    ? "w-full font-sans text-left flex flex-col gap-1 text-[14px] drop-shadow-md"
-    : `${bgColor} w-full p-4 font-sans text-left flex flex-col gap-1 text-[14px] rounded-lg border ${borderColor}`;
+    ? "w-full text-left flex flex-col gap-1 text-[14px] drop-shadow-md"
+    : `${bgColor} w-full p-4 text-left flex flex-col gap-1 text-[14px] rounded-lg border ${borderColor}`;
 
   return (
     <div className={containerClasses}>
       <div className="flex items-start w-full">
-        <img src={state.avatarUrl} alt="Avatar" className="w-6 h-6 rounded-full object-cover mr-3 bg-gray-800 shrink-0 mt-0.5" />
+        {state.avatarUrl && (
+          <img src={state.avatarUrl} alt="Avatar" className="w-6 h-6 rounded-full object-cover mr-3 bg-gray-800 shrink-0 mt-0.5" />
+        )}
         <div className="flex-1 min-w-0 leading-relaxed">
           <span className="font-bold text-[#53FC18] mr-2 inline-flex items-center">
             {state.username}
@@ -38,7 +40,9 @@ export function KickLivePreview({ state, onThemeToggle }: Props) {
       
       {(state.additionalComments || []).map((comment) => (
         <div key={comment.id} className="flex items-start w-full">
-          <img src={comment.avatarUrl} alt="Avatar" className="w-6 h-6 rounded-full object-cover mr-3 bg-gray-800 shrink-0 mt-0.5" />
+          {comment.avatarUrl && (
+            <img src={comment.avatarUrl} alt="Avatar" className="w-6 h-6 rounded-full object-cover mr-3 bg-gray-800 shrink-0 mt-0.5" />
+          )}
           <div className="flex-1 min-w-0 leading-relaxed">
             <span className="font-bold text-[#53FC18] mr-2 inline-flex items-center">
               {comment.username}

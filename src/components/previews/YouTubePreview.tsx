@@ -18,10 +18,12 @@ export function YouTubePreview({ state, onThemeToggle }: Props) {
   const linkColor = isDark ? 'text-[#3EA6FF]' : 'text-[#065FD4]';
 
   return (
-    <div className={`w-full ${bgColor} p-4 text-left`} style={{ fontFamily: '"Roboto", Arial, sans-serif' }}>
+    <div className={`w-full ${bgColor} p-4 text-left`}>
       <div className="flex items-start">
         {/* Avatar */}
-        <img src={state.avatarUrl} alt="Avatar" className={`w-[40px] h-[40px] rounded-full object-cover mr-4 bg-gray-200 shrink-0 ${isDark ? 'border border-gray-800' : ''}`} />
+        {state.avatarUrl && (
+          <img src={state.avatarUrl} alt="Avatar" className={`w-[40px] h-[40px] rounded-full object-cover mr-4 bg-gray-200 shrink-0 ${isDark ? 'border border-gray-800' : ''}`} />
+        )}
         
         {/* Content */}
         <div className="flex-1 min-w-0">

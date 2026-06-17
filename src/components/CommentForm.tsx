@@ -125,9 +125,37 @@ export function CommentForm({ state, onChange, onRandomize }: Props) {
 
       <div className="space-y-4 overflow-y-auto pr-2 custom-scrollbar">
         <div>
+          <label className="block text-[10px] font-bold text-gray-500 uppercase mb-1.5">Font Style</label>
+          <div className="flex bg-[#0A0A0A] border border-[#2D2D2D] rounded-lg p-1">
+            <button
+              onClick={() => onChange({ fontFamily: 'system' })}
+              className={`flex-1 py-1 text-sm rounded-md transition ${state.fontFamily === 'system' || !state.fontFamily ? 'bg-[#2D2D2D] text-white' : 'text-gray-400 hover:text-white'}`}
+            >
+              System
+            </button>
+            <button
+              onClick={() => onChange({ fontFamily: 'roboto' })}
+              className={`flex-1 py-1 text-sm rounded-md transition ${state.fontFamily === 'roboto' ? 'bg-[#2D2D2D] text-white' : 'text-gray-400 hover:text-white'}`}
+            >
+              Roboto (Android)
+            </button>
+            <button
+              onClick={() => onChange({ fontFamily: 'san-francisco' })}
+              className={`flex-1 py-1 text-sm rounded-md transition ${state.fontFamily === 'san-francisco' ? 'bg-[#2D2D2D] text-white' : 'text-gray-400 hover:text-white'}`}
+            >
+              San Francisco (iOS)
+            </button>
+          </div>
+        </div>
+
+        <div>
           <label className="block text-[10px] font-bold text-gray-500 uppercase mb-1.5">Avatar</label>
           <div className="flex items-center space-x-4">
-            <img src={state.avatarUrl} alt="Avatar" className="w-10 h-10 rounded-full object-cover border border-[#2D2D2D] bg-[#0A0A0A]" />
+            {state.avatarUrl ? (
+              <img src={state.avatarUrl} alt="Avatar" className="w-10 h-10 rounded-full object-cover border border-[#2D2D2D] bg-[#0A0A0A]" />
+            ) : (
+              <div className="w-10 h-10 rounded-full border border-dashed border-[#2D2D2D] bg-[#0A0A0A]"></div>
+            )}
             <div className="flex-1">
               <input 
                 type="file" 
@@ -143,6 +171,13 @@ export function CommentForm({ state, onChange, onRandomize }: Props) {
                 <Image className="w-4 h-4 mr-2" />
                 Upload
               </label>
+              <button 
+                onClick={() => onChange({ avatarUrl: '' })}
+                className="ml-2 inline-flex items-center px-3 py-1.5 bg-[#0A0A0A] hover:bg-red-500/20 hover:text-red-400 hover:border-red-500/30 border border-[#2D2D2D] rounded-lg text-sm text-gray-300 transition"
+                title="Hapus Avatar"
+              >
+                Kosongkan
+              </button>
               <p className="mt-1 text-[10px] text-gray-500">JPG/PNG maks 2MB</p>
             </div>
           </div>
@@ -320,12 +355,22 @@ export function CommentForm({ state, onChange, onRandomize }: Props) {
                    <div className="text-[10px] text-gray-500 mb-2 font-bold uppercase">Comment {index + 2}</div>
                    
                    <div className="flex items-center space-x-3 mb-3">
-                     <img src={comment.avatarUrl} className="w-8 h-8 rounded-full border border-[#2D2D2D]" alt="Avatar" />
+                     {comment.avatarUrl ? (
+                       <img src={comment.avatarUrl} className="w-8 h-8 rounded-full border border-[#2D2D2D] bg-[#141414]" alt="Avatar" />
+                     ) : (
+                       <div className="w-8 h-8 rounded-full border border-dashed border-[#2D2D2D] bg-[#141414]"></div>
+                     )}
                      <button 
                        onClick={() => updateAdditionalComment(comment.id, { avatarUrl: `https://api.dicebear.com/8.x/notionists/svg?seed=${Math.random()}` })}
                        className="text-[10px] bg-[#141414] hover:bg-[#2D2D2D] border border-[#2D2D2D] px-2 py-1 rounded text-gray-300 transition"
                      >
                        <Shuffle className="w-3 h-3 inline mr-1" /> Acak Avatar
+                     </button>
+                     <button 
+                       onClick={() => updateAdditionalComment(comment.id, { avatarUrl: '' })}
+                       className="text-[10px] bg-[#141414] hover:bg-red-500/20 hover:text-red-400 hover:border-red-500/30 border border-[#2D2D2D] px-2 py-1 rounded text-gray-300 transition ml-2"
+                     >
+                       Kosongkan
                      </button>
                    </div>
                    

@@ -10,17 +10,19 @@ interface Props {
 
 export function IGLivePreview({ state, onThemeToggle }: Props) {
   const isDark = state.theme === 'dark';
-  const bgColor = state.hideLiveBackground ? 'bg-transparent' : (isDark ? 'bg-black/30' : 'bg-white/80');
+  const bgColor = state.hideLiveBackground ? 'bg-transparent' : (isDark ? 'bg-black' : 'bg-white');
   const textColor = isDark ? 'text-white' : 'text-black';
   const containerClasses = state.hideLiveBackground 
     ? "flex items-start max-w-sm w-full drop-shadow-md" 
     : `flex items-start ${bgColor} backdrop-blur-md rounded-2xl p-2.5 max-w-sm w-full shadow-sm`;
 
   return (
-    <div className="w-full flex justify-start font-sans text-left relative pt-10 pb-4 flex-col gap-1">
+    <div className="w-full flex justify-start text-left relative pt-10 pb-4 flex-col gap-1">
       {/* Container for main live comment styling */}
       <div className={containerClasses}>
-        <img src={state.avatarUrl} alt="Avatar" className={`w-[34px] h-[34px] rounded-full object-cover mr-3 bg-gray-800 shrink-0 ${state.hideLiveBackground ? '' : (isDark ? 'border border-white/10' : 'border border-gray-200')}`} />
+        {state.avatarUrl && (
+          <img src={state.avatarUrl} alt="Avatar" className={`w-[34px] h-[34px] rounded-full object-cover mr-3 bg-gray-800 shrink-0 ${state.hideLiveBackground ? '' : (isDark ? 'border border-white/10' : 'border border-gray-200')}`} />
+        )}
         <div className="flex-1 min-w-0">
           <div className="flex items-center mb-0.5">
             <span className={`font-semibold ${isDark ? 'text-white/90' : 'text-gray-900'} text-[13px] mr-1 ${state.hideLiveBackground && !isDark ? 'drop-shadow-md' : ''}`}>
@@ -43,7 +45,9 @@ export function IGLivePreview({ state, onThemeToggle }: Props) {
       {/* Additional stacked comments */}
       {(state.additionalComments || []).map((comment) => (
         <div key={comment.id} className={containerClasses}>
-          <img src={comment.avatarUrl} alt="Avatar" className={`w-[34px] h-[34px] rounded-full object-cover mr-3 bg-gray-800 shrink-0 ${state.hideLiveBackground ? '' : (isDark ? 'border border-white/10' : 'border border-gray-200')}`} />
+          {comment.avatarUrl && (
+            <img src={comment.avatarUrl} alt="Avatar" className={`w-[34px] h-[34px] rounded-full object-cover mr-3 bg-gray-800 shrink-0 ${state.hideLiveBackground ? '' : (isDark ? 'border border-white/10' : 'border border-gray-200')}`} />
+          )}
           <div className="flex-1 min-w-0">
             <div className="flex items-center mb-0.5">
               <span className={`font-semibold ${isDark ? 'text-white/90' : 'text-gray-900'} text-[13px] mr-1 ${state.hideLiveBackground && !isDark ? 'drop-shadow-md' : ''}`}>

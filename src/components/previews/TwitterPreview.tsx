@@ -18,10 +18,12 @@ export function TwitterPreview({ state, onThemeToggle }: Props) {
   const mutedColor = isDark ? 'text-[#71767B]' : 'text-[#536471]';
 
   return (
-    <div className={`w-full ${bgColor} p-4 text-left font-sans ${nameColor} border ${borderColor}`}>
+    <div className={`w-full ${bgColor} p-4 text-left ${nameColor} border ${borderColor}`}>
       <div className="flex items-start">
         {/* Avatar */}
-        <img src={state.avatarUrl} alt="Avatar" className="w-10 h-10 rounded-full object-cover mr-3 bg-neutral-800 shrink-0" />
+        {state.avatarUrl && (
+          <img src={state.avatarUrl} alt="Avatar" className="w-10 h-10 rounded-full object-cover mr-3 bg-neutral-800 shrink-0" />
+        )}
         
         {/* Content */}
         <div className="flex-1 min-w-0">

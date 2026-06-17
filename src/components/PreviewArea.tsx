@@ -62,6 +62,17 @@ export function PreviewArea({ state, onStateChange }: Props) {
     }
   };
 
+  const getFontFamilyStyle = () => {
+    switch (state.fontFamily) {
+      case 'roboto':
+        return { fontFamily: 'Roboto, Arial, sans-serif' };
+      case 'san-francisco':
+        return { fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif' };
+      default:
+        return {}; // Tailwind default
+    }
+  };
+
   return (
     <div className="flex flex-col h-full bg-[#141414] border border-[#2D2D2D] rounded-2xl overflow-hidden flex-1 relative">
       <div className="p-4 border-b border-[#2D2D2D] flex items-center justify-between shrink-0">
@@ -85,10 +96,10 @@ export function PreviewArea({ state, onStateChange }: Props) {
            backgroundPosition: '0 0, 0 10px, 10px -10px, -10px 0px'
          }}></div>
          
-         <div className="relative z-10 w-full max-w-lg flex justify-center drop-shadow-xl">
+         <div className="relative z-10 w-full max-w-lg flex justify-center drop-shadow-xl" style={getFontFamilyStyle()}>
            <div 
               ref={previewRef} 
-              className="flex justify-center rounded-xl overflow-hidden shadow-2xl"
+              className="flex justify-center rounded-xl overflow-hidden shadow-2xl w-full"
               style={{ backgroundColor: 'transparent' }}
            >
               {getPreviewComponent()}

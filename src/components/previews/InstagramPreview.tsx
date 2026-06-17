@@ -15,10 +15,12 @@ export function InstagramPreview({ state, onThemeToggle }: Props) {
   const mutedColor = isDark ? 'text-[#A8A8A8]' : 'text-gray-500';
 
   return (
-    <div className={`w-full ${bgColor} p-4 font-sans text-left`}>
+    <div className={`w-full ${bgColor} p-4 text-left`}>
       <div className="flex items-start">
         {/* Avatar */}
-        <img src={state.avatarUrl} alt="Avatar" className={`w-8 h-8 rounded-full object-cover mr-3 bg-gray-200 shrink-0 ${isDark ? '' : 'border border-gray-100'}`} />
+        {state.avatarUrl && (
+          <img src={state.avatarUrl} alt="Avatar" className={`w-8 h-8 rounded-full object-cover mr-3 bg-gray-200 shrink-0 ${isDark ? '' : 'border border-gray-100'}`} />
+        )}
         
         {/* Content */}
         <div className="flex-1 min-w-0 pr-4">

@@ -27,6 +27,7 @@ export interface CommentState {
   timestamp: string;
   additionalComments: AdditionalComment[];
   hideLiveBackground: boolean;
+  fontFamily: 'system' | 'roboto' | 'san-francisco';
 }
 
 export const defaultState: CommentState = {
@@ -46,4 +47,5 @@ export const defaultState: CommentState = {
   timestamp: '2j lalu',
   additionalComments: [],
   hideLiveBackground: false,
+  fontFamily: 'system',
 };
