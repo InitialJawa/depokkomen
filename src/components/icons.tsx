@@ -15,7 +15,7 @@ export const TikTokColoredIcon = ({ className }: { className?: string }) => (
 export const InstagramColoredIcon = ({ className }: { className?: string }) => (
   <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
     <defs>
-      <linearGradient id="ig-grad" x1="0%" y1="100%" x2="100%" y2="0%">
+      <linearGradient id="instagram-gradient" x1="0%" y1="100%" x2="100%" y2="0%">
         <stop offset="0%" stopColor="#f09433" />
         <stop offset="25%" stopColor="#e6683c" />
         <stop offset="50%" stopColor="#dc2743" />
@@ -23,9 +23,9 @@ export const InstagramColoredIcon = ({ className }: { className?: string }) => (
         <stop offset="100%" stopColor="#bc1888" />
       </linearGradient>
     </defs>
-    <rect x="2" y="2" width="20" height="20" rx="5" stroke="url(#ig-grad)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" stroke="url(#ig-grad)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-    <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" stroke="url(#ig-grad)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <rect x="2" y="2" width="20" height="20" rx="5" stroke="url(#instagram-gradient)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" stroke="url(#instagram-gradient)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" stroke="url(#instagram-gradient)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
   </svg>
 );
 

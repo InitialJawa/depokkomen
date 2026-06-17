@@ -2,6 +2,14 @@ export type Platform = 'tiktok' | 'instagram' | 'youtube' | 'twitter' | 'kick_li
 export type TikTokTemplate = 'video' | 'reply';
 export type InstagramTemplate = 'comment' | 'live';
 
+export interface AdditionalComment {
+  id: string;
+  avatarUrl: string;
+  username: string;
+  isVerified: boolean;
+  commentText: string;
+}
+
 export interface CommentState {
   platform: Platform;
   tiktokTemplate: TikTokTemplate;
@@ -17,6 +25,8 @@ export interface CommentState {
   retweetCount: string;
   replyCount: string;
   timestamp: string;
+  additionalComments: AdditionalComment[];
+  hideLiveBackground: boolean;
 }
 
 export const defaultState: CommentState = {
@@ -34,4 +44,6 @@ export const defaultState: CommentState = {
   retweetCount: '800',
   replyCount: '24',
   timestamp: '2j lalu',
+  additionalComments: [],
+  hideLiveBackground: false,
 };

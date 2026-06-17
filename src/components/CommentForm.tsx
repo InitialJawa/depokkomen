@@ -1,6 +1,6 @@
 import React, { useRef } from 'react';
-import { CommentState } from '../types';
-import { Image, Shuffle, Highlighter, EyeOff, Scissors, RotateCcw } from 'lucide-react';
+import { CommentState, AdditionalComment } from '../types';
+import { Image, Shuffle, Highlighter, EyeOff, Scissors, RotateCcw, Plus, Trash2 } from 'lucide-react';
 import { getRandomState } from '../utils';
 
 interface Props {
@@ -46,6 +46,29 @@ export function CommentForm({ state, onChange, onRandomize }: Props) {
     const newText = state.commentText.replace(/\[\/?(highlight|blur|cut)\]/g, '');
     onChange({ commentText: newText });
   };
+
+  const addAdditionalComment = () => {
+    const newComment: AdditionalComment = {
+      id: Math.random().toString(36).substring(7),
+      username: 'User Baru',
+      avatarUrl: `https://api.dicebear.com/8.x/notionists/svg?seed=${Math.random()}`,
+      isVerified: false,
+      commentText: 'Komentar tambahan...'
+    };
+    onChange({ additionalComments: [...(state.additionalComments || []), newComment] });
+  };
+
+  const updateAdditionalComment = (id: string, updates: Partial<AdditionalComment>) => {
+    const updated = (state.additionalComments || []).map(c => c.id === id ? { ...c, ...updates } : c);
+    onChange({ additionalComments: updated });
+  };
+
+  const removeAdditionalComment = (id: string) => {
+    const updated = (state.additionalComments || []).filter(c => c.id !== id);
+    onChange({ additionalComments: updated });
+  };
+
+  const isLiveMode = state.platform === 'kick_live' || (state.platform === 'instagram' && state.instagramTemplate === 'live');
 
   return (
     <div className="bg-[#141414] border border-[#2D2D2D] rounded-2xl p-5 flex flex-col gap-5 flex-1">
@@ -258,6 +281,94 @@ export function CommentForm({ state, onChange, onRandomize }: Props) {
              </button>
            </div>
         </div>
+
+        {isLiveMode && (
+           <div className="pt-4 border-t border-[#2D2D2D] mt-2">
+             <div className="flex items-center mb-4 pb-4 border-b border-[#2D2D2D]">
+               <input 
+                 type="checkbox" 
+                 id="hide-bg" 
+                 checked={state.hideLiveBackground || false}
+                 onChange={e => onChange({ hideLiveBackground: e.target.checked })}
+                 className="w-4 h-4 rounded border-[#2D2D2D] text-blue-600 focus:ring-blue-600 focus:ring-offset-[#141414] bg-[#0A0A0A]"
+               />
+               <label htmlFor="hide-bg" className="ml-2 text-sm text-gray-300 select-none">
+                 Transparent Background (Cuma Text & PP)
+               </label>
+             </div>
+
+             <div className="flex items-center justify-between mb-3">
+               <h3 className="text-xs font-bold uppercase tracking-wider text-gray-400">Additional Stacked Comments</h3>
+               <button 
+                 onClick={addAdditionalComment}
+                 className="flex items-center text-[10px] bg-blue-600 hover:bg-blue-500 text-white px-2 py-1.5 rounded transition"
+               >
+                 <Plus className="w-3 h-3 mr-1" />
+                 TAMBAH
+               </button>
+             </div>
+             
+             <div className="space-y-4">
+               {(state.additionalComments || []).map((comment, index) => (
+                 <div key={comment.id} className="p-3 bg-[#0A0A0A] border border-[#2D2D2D] rounded-xl relative">
+                   <button 
+                     onClick={() => removeAdditionalComment(comment.id)}
+                     className="absolute top-2 right-2 text-gray-500 hover:text-red-400 transition"
+                   >
+                     <Trash2 className="w-4 h-4" />
+                   </button>
+                   <div className="text-[10px] text-gray-500 mb-2 font-bold uppercase">Comment {index + 2}</div>
+                   
+                   <div className="flex items-center space-x-3 mb-3">
+                     <img src={comment.avatarUrl} className="w-8 h-8 rounded-full border border-[#2D2D2D]" alt="Avatar" />
+                     <button 
+                       onClick={() => updateAdditionalComment(comment.id, { avatarUrl: `https://api.dicebear.com/8.x/notionists/svg?seed=${Math.random()}` })}
+                       className="text-[10px] bg-[#141414] hover:bg-[#2D2D2D] border border-[#2D2D2D] px-2 py-1 rounded text-gray-300 transition"
+                     >
+                       <Shuffle className="w-3 h-3 inline mr-1" /> Acak Avatar
+                     </button>
+                   </div>
+                   
+                   <div className="grid grid-cols-2 gap-3 mb-3">
+                     <div className="col-span-2">
+                       <label className="block text-[10px] font-bold text-gray-500 uppercase mb-1">Username</label>
+                       <input 
+                         type="text" 
+                         value={comment.username}
+                         onChange={e => updateAdditionalComment(comment.id, { username: e.target.value })}
+                         className="w-full bg-[#141414] border border-[#2D2D2D] rounded flex-1 px-2 py-1.5 text-xs text-white outline-none focus:border-blue-500"
+                       />
+                     </div>
+                     <div className="col-span-2 flex items-center">
+                       <input 
+                         type="checkbox" 
+                         checked={comment.isVerified}
+                         onChange={e => updateAdditionalComment(comment.id, { isVerified: e.target.checked })}
+                         className="w-3.5 h-3.5 rounded border-[#2D2D2D] text-blue-600 focus:ring-blue-600 bg-[#141414]"
+                       />
+                       <span className="ml-2 text-xs text-gray-300 select-none">Verified Badge</span>
+                     </div>
+                   </div>
+                   
+                   <div>
+                     <label className="block text-[10px] font-bold text-gray-500 uppercase mb-1">Komentar</label>
+                     <textarea 
+                       value={comment.commentText}
+                       onChange={e => updateAdditionalComment(comment.id, { commentText: e.target.value })}
+                       className="w-full bg-[#141414] border border-[#2D2D2D] rounded px-2 py-1.5 text-xs text-white outline-none focus:border-blue-500 resize-none h-16"
+                     />
+                   </div>
+                 </div>
+               ))}
+               
+               {(!state.additionalComments || state.additionalComments.length === 0) && (
+                 <div className="text-center py-4 text-xs text-gray-500 border border-dashed border-[#2D2D2D] rounded-xl">
+                   Belum ada komentar tambahan.
+                 </div>
+               )}
+             </div>
+           </div>
+        )}
 
       </div>
     </div>
