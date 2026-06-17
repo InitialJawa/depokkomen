@@ -1,7 +1,7 @@
 import React, { useRef } from 'react';
 import { CommentState, AdditionalComment } from '../types';
 import { Image, Shuffle, Highlighter, EyeOff, Scissors, RotateCcw, Plus, Trash2 } from 'lucide-react';
-import { getRandomState, usernames, getRandomAvatarUrl } from '../utils';
+import { getRandomState, maleUsernames, femaleUsernames, getRandomAvatarUrl } from '../utils';
 
 interface Props {
   state: CommentState;
@@ -48,10 +48,13 @@ export function CommentForm({ state, onChange, onRandomize }: Props) {
   };
 
   const addAdditionalComment = () => {
+    const isMale = Math.random() > 0.5;
+    const array = isMale ? maleUsernames : femaleUsernames;
+    
     const newComment: AdditionalComment = {
       id: Math.random().toString(36).substring(7),
-      username: usernames[Math.floor(Math.random() * usernames.length)],
-      avatarUrl: getRandomAvatarUrl(),
+      username: array[Math.floor(Math.random() * array.length)],
+      avatarUrl: getRandomAvatarUrl(isMale ? 'male' : 'female'),
       isVerified: false,
       commentText: 'Komentar tambahan...'
     };
@@ -167,7 +170,12 @@ export function CommentForm({ state, onChange, onRandomize }: Props) {
                 Upload
               </label>
               <button 
-                onClick={() => onChange({ avatarUrl: getRandomAvatarUrl() })}
+                onClick={() => {
+                  let isMale = Math.random() > 0.5;
+                  if (maleUsernames.includes(state.username)) isMale = true;
+                  else if (femaleUsernames.includes(state.username)) isMale = false;
+                  onChange({ avatarUrl: getRandomAvatarUrl(isMale ? 'male' : 'female') });
+                }}
                 className="ml-2 inline-flex items-center px-3 py-1.5 bg-[#0A0A0A] hover:bg-[#2D2D2D] border border-[#2D2D2D] rounded-lg text-sm text-gray-300 transition"
                 title="Acak Foto Profil"
               >
@@ -363,10 +371,14 @@ export function CommentForm({ state, onChange, onRandomize }: Props) {
                        <div className="w-8 h-8 rounded-full border border-dashed border-[#2D2D2D] bg-[#141414]"></div>
                      )}
                      <button 
-                       onClick={() => updateAdditionalComment(comment.id, { 
-                         avatarUrl: getRandomAvatarUrl(),
-                         username: usernames[Math.floor(Math.random() * usernames.length)]
-                       })}
+                       onClick={() => {
+                         const isMale = Math.random() > 0.5;
+                         const array = isMale ? maleUsernames : femaleUsernames;
+                         updateAdditionalComment(comment.id, { 
+                           avatarUrl: getRandomAvatarUrl(isMale ? 'male' : 'female'),
+                           username: array[Math.floor(Math.random() * array.length)]
+                         });
+                       }}
                        className="text-[10px] bg-[#141414] hover:bg-[#2D2D2D] border border-[#2D2D2D] px-2 py-1 rounded text-gray-300 transition"
                      >
                        <Shuffle className="w-3 h-3 inline mr-1" /> Acak Profil
