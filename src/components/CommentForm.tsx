@@ -171,13 +171,18 @@ export function CommentForm({ state, onChange, onRandomize }: Props) {
               </label>
               <button 
                 onClick={() => {
-                  let isMale = Math.random() > 0.5;
-                  if (maleUsernames.includes(state.username)) isMale = true;
-                  else if (femaleUsernames.includes(state.username)) isMale = false;
-                  onChange({ avatarUrl: getRandomAvatarUrl(isMale ? 'male' : 'female') });
+                  const isMale = Math.random() > 0.5;
+                  const array = isMale ? maleUsernames : femaleUsernames;
+                  const newName = array[Math.floor(Math.random() * array.length)];
+                  const newHandle = `@${newName.replace(/\\s+/g, '').toLowerCase()}${Math.floor(Math.random() * 100)}`;
+                  onChange({ 
+                    avatarUrl: getRandomAvatarUrl(isMale ? 'male' : 'female'),
+                    username: newName,
+                    handle: newHandle
+                  });
                 }}
                 className="ml-2 inline-flex items-center px-3 py-1.5 bg-[#0A0A0A] hover:bg-[#2D2D2D] border border-[#2D2D2D] rounded-lg text-sm text-gray-300 transition"
-                title="Acak Foto Profil"
+                title="Acak Profil"
               >
                 <Shuffle className="w-4 h-4" />
               </button>
