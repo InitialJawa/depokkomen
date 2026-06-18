@@ -448,7 +448,9 @@ export function CommentForm({ state, onChange, onRandomize, onReset }: Props) {
                  { label: "Suhu", text: "The real suhu emang beda 🥶" },
                  { label: "Kawal FYP", text: "Kawal sampai tembus fyp 🔥🚀" },
                  { label: "Relate", text: "Agak laen emang, tapi relate banget woy 😭😭" },
-                 { label: "Info Loker", text: "Info loker info maseehhh" }
+                 { label: "Info Loker", text: "Info loker info maseehhh" },
+                 { label: "Jokowi", text: "HIDUP JOKOWI!!" },
+                 { label: "Antek Asing", text: "HEEYY.. ANTEK ANTEK ASING!" }
                ].map(preset => (
                  <button
                    key={preset.label}
