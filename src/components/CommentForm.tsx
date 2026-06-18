@@ -354,18 +354,20 @@ export function CommentForm({ state, onChange, onRandomize }: Props) {
                   Disukai oleh Kreator (Creator Liked)
                 </label>
               </div>
-              <div className="col-span-2 flex items-center mt-1">
-                <input 
-                  type="checkbox" 
-                  id="isPinned" 
-                  checked={state.isPinned}
-                  onChange={e => onChange({ isPinned: e.target.checked })}
-                  className="w-4 h-4 rounded border-[#2D2D2D] text-gray-400 focus:ring-gray-500 focus:ring-offset-[#141414] bg-[#0A0A0A]"
-                />
-                <label htmlFor="isPinned" className="ml-2 text-sm text-gray-300 select-none">
-                  Komentar Disematkan (Pinned)
-                </label>
-              </div>
+              {!(state.platform === 'tiktok' && state.tiktokTemplate === 'reply') && !(state.platform === 'instagram' && state.instagramTemplate === 'live') && (
+                <div className="col-span-2 flex items-center mt-1">
+                  <input 
+                    type="checkbox" 
+                    id="isPinned" 
+                    checked={state.isPinned}
+                    onChange={e => onChange({ isPinned: e.target.checked })}
+                    className="w-4 h-4 rounded border-[#2D2D2D] text-gray-400 focus:ring-gray-500 focus:ring-offset-[#141414] bg-[#0A0A0A]"
+                  />
+                  <label htmlFor="isPinned" className="ml-2 text-sm text-gray-300 select-none">
+                    Komentar Disematkan (Pinned)
+                  </label>
+                </div>
+              )}
             </>
           )}
         </div>
