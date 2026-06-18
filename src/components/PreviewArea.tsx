@@ -99,27 +99,46 @@ export function PreviewArea({ state, onStateChange }: Props) {
          <div className="relative z-10 flex justify-center drop-shadow-xl" style={getFontFamilyStyle()}>
            <div 
               ref={previewRef} 
-              className="flex justify-center rounded-[14px] overflow-hidden shadow-2xl"
+              className={`flex justify-center transition-all ${state.hasDropShadow ? 'p-8' : 'p-0'}`}
               style={{ backgroundColor: 'transparent' }}
            >
-              {getPreviewComponent()}
+              <div className={`flex justify-center transition-all ${state.hasDropShadow ? 'drop-shadow-[14px_14px_23px_rgba(0,0,0,0.49)]' : ''}`}>
+                {getPreviewComponent()}
+              </div>
            </div>
          </div>
       </div>
       
       <div className="p-4 border-t border-[var(--panel-border)] bg-[var(--root-bg)] shrink-0">
-        <div className="flex items-center justify-between mb-4 px-2">
-           <span className="text-xs text-[var(--text-muted)]">Tema Komentar</span>
-           <div className="flex bg-[var(--panel-bg)] border border-[var(--panel-border)] rounded-lg p-1">
+        <div className="flex flex-col sm:flex-row items-center justify-between mb-4 px-2 gap-3 sm:gap-0">
+           <div className="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-start">
+             <span className="text-xs text-[var(--text-muted)]">Tema Komentar</span>
+             
+             {/* Drop Shadow Toggle */}
+             <div className="flex items-center gap-2">
+               <span className="text-xs text-[var(--text-muted)] font-medium">Fx Shadow</span>
+               <label className="relative inline-flex items-center flex-col cursor-pointer">
+                 <input 
+                   type="checkbox" 
+                   className="sr-only peer"
+                   checked={state.hasDropShadow}
+                   onChange={(e) => onStateChange({ hasDropShadow: e.target.checked })}
+                 />
+                 <div className="w-9 h-5 bg-[var(--panel-border)] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[var(--accent)]"></div>
+               </label>
+             </div>
+           </div>
+
+           <div className="flex bg-[var(--panel-bg)] border border-[var(--panel-border)] rounded-lg p-1 w-full sm:w-auto justify-center">
              <button
                onClick={() => onStateChange({ theme: 'light' })}
-               className={`px-3 py-1.5 text-[10px] uppercase font-bold rounded-md transition flex items-center gap-1.5 ${state.theme === 'light' ? 'bg-[var(--panel-bg)] shadow-[0_1px_3px_rgba(0,0,0,0.1)] text-[var(--root-fg)]' : 'text-[var(--text-muted)] hover:text-[var(--root-fg)]'}`}
+               className={`px-3 py-1.5 flex-1 sm:flex-none justify-center text-[10px] uppercase font-bold rounded-md transition flex items-center gap-1.5 ${state.theme === 'light' ? 'bg-[var(--panel-bg)] shadow-[0_1px_3px_rgba(0,0,0,0.1)] text-[var(--root-fg)]' : 'text-[var(--text-muted)] hover:text-[var(--root-fg)]'}`}
              >
                <Sun className="w-3 h-3" /> Light
              </button>
              <button
                onClick={() => onStateChange({ theme: 'dark' })}
-               className={`px-3 py-1.5 text-[10px] uppercase font-bold rounded-md transition flex items-center gap-1.5 ${state.theme === 'dark' ? 'bg-[var(--panel-bg)] shadow-[0_1px_3px_rgba(0,0,0,0.1)] text-[var(--root-fg)]' : 'text-[var(--text-muted)] hover:text-[var(--root-fg)]'}`}
+               className={`px-3 py-1.5 flex-1 sm:flex-none justify-center text-[10px] uppercase font-bold rounded-md transition flex items-center gap-1.5 ${state.theme === 'dark' ? 'bg-[var(--panel-bg)] shadow-[0_1px_3px_rgba(0,0,0,0.1)] text-[var(--root-fg)]' : 'text-[var(--text-muted)] hover:text-[var(--root-fg)]'}`}
              >
                <Moon className="w-3 h-3" /> Dark
              </button>

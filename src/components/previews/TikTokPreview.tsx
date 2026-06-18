@@ -25,7 +25,7 @@ export function TikTokPreview({ state, onThemeToggle }: Props) {
 
   return (
     <div 
-      className={`flex flex-col relative ${isReply ? 'w-fit max-w-lg sm:max-w-xl rounded-xl drop-shadow-xl mt-4 p-4' : 'w-fit max-w-lg sm:max-w-xl p-4 rounded-lg'}`}
+      className={`flex flex-col relative ${isReply ? 'w-fit max-w-lg sm:max-w-xl rounded-xl mt-4 p-4' : 'w-fit max-w-lg sm:max-w-xl p-4 rounded-lg'}`}
       style={isReply ? bubbleStyle : { backgroundColor: defaultBg }}
     >
       {state.isPinned && !isReply && (

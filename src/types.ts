@@ -45,6 +45,7 @@ export interface CommentState {
   nestedReplies: NestedReply[];
   hideLiveBackground: boolean;
   fontFamily: 'roboto' | 'san-francisco';
+  hasDropShadow: boolean;
 }
 
 export const defaultState: CommentState = {
@@ -70,4 +71,5 @@ export const defaultState: CommentState = {
   nestedReplies: [],
   hideLiveBackground: false,
   fontFamily: 'san-francisco',
+  hasDropShadow: true,
 };

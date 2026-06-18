@@ -8,15 +8,16 @@ import { getRandomState } from './utils';
 
 export default function App() {
   const [state, setState] = useState(defaultState);
+  const [appTheme, setAppTheme] = useState<'light' | 'dark'>('dark');
 
   // Sync dark class on document element
   useEffect(() => {
-    if (state.theme === 'dark') {
+    if (appTheme === 'dark') {
       document.documentElement.classList.add('dark');
     } else {
       document.documentElement.classList.remove('dark');
     }
-  }, [state.theme]);
+  }, [appTheme]);
 
   const handleStateChange = (updates: Partial<typeof defaultState>) => {
     setState(prev => ({ ...prev, ...updates }));
@@ -30,9 +31,9 @@ export default function App() {
     <div className="min-h-screen bg-[var(--root-bg)] text-[var(--root-fg)] font-sans selection:bg-[var(--accent)]/30 flex flex-col h-screen overflow-hidden">
       <Header 
         platform={state.platform}
-        theme={state.theme}
+        theme={appTheme}
         onPlatformChange={(platform) => handleStateChange({ platform })}
-        onThemeChange={(theme) => handleStateChange({ theme })}
+        onThemeChange={setAppTheme}
       />
       
       <main className="flex-1 flex flex-col p-4 lg:p-6 gap-4 lg:gap-6 w-full max-w-[1440px] mx-auto overflow-y-auto h-full">
