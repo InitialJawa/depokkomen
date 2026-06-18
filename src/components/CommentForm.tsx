@@ -71,6 +71,36 @@ export function CommentForm({ state, onChange, onRandomize }: Props) {
     onChange({ additionalComments: updated });
   };
 
+  const addNestedReply = () => {
+    const isMale = Math.random() > 0.5;
+    const array = isMale ? maleUsernames : femaleUsernames;
+    const newName = array[Math.floor(Math.random() * array.length)];
+    const newHandle = `@${newName.replace(/\s+/g, '').toLowerCase()}${Math.floor(Math.random() * 100)}`;
+    
+    const newReply: import('../types').NestedReply = {
+      id: Math.random().toString(36).substring(7),
+      username: newName,
+      handle: newHandle,
+      avatarUrl: getRandomAvatarUrl(isMale ? 'male' : 'female'),
+      isVerified: false,
+      commentText: 'Membalas: setuju banget!',
+      timestamp: '1j lalu',
+      likeCount: '0',
+      creatorLiked: false,
+    };
+    onChange({ nestedReplies: [...(state.nestedReplies || []), newReply] });
+  };
+
+  const updateNestedReply = (id: string, updates: Partial<import('../types').NestedReply>) => {
+    const updated = (state.nestedReplies || []).map(r => r.id === id ? { ...r, ...updates } : r);
+    onChange({ nestedReplies: updated });
+  };
+
+  const removeNestedReply = (id: string) => {
+    const updated = (state.nestedReplies || []).filter(r => r.id !== id);
+    onChange({ nestedReplies: updated });
+  };
+
   const isLiveMode = state.platform === 'kick_live' || (state.platform === 'instagram' && state.instagramTemplate === 'live');
 
   return (
@@ -127,23 +157,39 @@ export function CommentForm({ state, onChange, onRandomize }: Props) {
       )}
 
       <div className="space-y-4 overflow-y-auto pr-2 custom-scrollbar">
-        <div>
-          <label className="block text-[10px] font-bold text-gray-500 uppercase mb-1.5">Font Style</label>
-          <select 
-            value={state.fontFamily || 'roboto'}
-            onChange={(e) => onChange({ fontFamily: e.target.value as any })}
-            className="w-full bg-[#0A0A0A] border border-[#2D2D2D] rounded-lg p-2 text-sm text-gray-300 focus:outline-none focus:border-blue-500 appearance-none"
-            style={{
-              backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%239CA3AF'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`,
-              backgroundRepeat: 'no-repeat',
-              backgroundPosition: 'right 0.5rem center',
-              backgroundSize: '1.2em 1.2em',
-              paddingRight: '2rem'
-            }}
-          >
-            <option value="roboto">Roboto (Android)</option>
-            <option value="san-francisco">San Francisco (iOS)</option>
-          </select>
+        <div className="flex gap-4">
+          <div className="flex-1">
+            <label className="block text-[10px] font-bold text-gray-500 uppercase mb-1.5">Font Style</label>
+            <select 
+              value={state.fontFamily || 'san-francisco'}
+              onChange={(e) => onChange({ fontFamily: e.target.value as any })}
+              className="w-full bg-[#0A0A0A] border border-[#2D2D2D] rounded-lg p-2 text-sm text-gray-300 focus:outline-none focus:border-blue-500 appearance-none"
+              style={{
+                backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%239CA3AF'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`,
+                backgroundRepeat: 'no-repeat',
+                backgroundPosition: 'right 0.5rem center',
+                backgroundSize: '1.2em 1.2em',
+                paddingRight: '2rem'
+              }}
+            >
+              <option value="san-francisco">San Francisco (iOS)</option>
+              <option value="roboto">Roboto (Android)</option>
+            </select>
+          </div>
+          
+          <div className="flex-1">
+            <label className="block text-[10px] font-bold text-gray-500 uppercase mb-1.5">Ukuran Font</label>
+            <div className="flex items-center gap-2 h-[38px]">
+              <input 
+                type="range" 
+                min="12" max="24" step="1"
+                value={state.fontSize || 15}
+                onChange={e => onChange({ fontSize: parseInt(e.target.value) })}
+                className="w-full accent-blue-500"
+              />
+              <span className="text-xs text-gray-400 w-8">{state.fontSize || 15}px</span>
+            </div>
+          </div>
         </div>
 
         <div>
@@ -295,18 +341,32 @@ export function CommentForm({ state, onChange, onRandomize }: Props) {
           </div>
           
           {(state.platform === 'tiktok' || state.platform === 'youtube' || state.platform === 'instagram') && (
-            <div className="col-span-2 flex items-center mt-1">
-              <input 
-                type="checkbox" 
-                id="creatorLiked" 
-                checked={state.creatorLiked}
-                onChange={e => onChange({ creatorLiked: e.target.checked })}
-                className="w-4 h-4 rounded border-[#2D2D2D] text-red-500 focus:ring-red-500 focus:ring-offset-[#141414] bg-[#0A0A0A]"
-              />
-              <label htmlFor="creatorLiked" className="ml-2 text-sm text-gray-300 select-none">
-                Disukai oleh Kreator (Creator Liked)
-              </label>
-            </div>
+            <>
+              <div className="col-span-2 flex items-center mt-1">
+                <input 
+                  type="checkbox" 
+                  id="creatorLiked" 
+                  checked={state.creatorLiked}
+                  onChange={e => onChange({ creatorLiked: e.target.checked })}
+                  className="w-4 h-4 rounded border-[#2D2D2D] text-red-500 focus:ring-red-500 focus:ring-offset-[#141414] bg-[#0A0A0A]"
+                />
+                <label htmlFor="creatorLiked" className="ml-2 text-sm text-gray-300 select-none">
+                  Disukai oleh Kreator (Creator Liked)
+                </label>
+              </div>
+              <div className="col-span-2 flex items-center mt-1">
+                <input 
+                  type="checkbox" 
+                  id="isPinned" 
+                  checked={state.isPinned}
+                  onChange={e => onChange({ isPinned: e.target.checked })}
+                  className="w-4 h-4 rounded border-[#2D2D2D] text-gray-400 focus:ring-gray-500 focus:ring-offset-[#141414] bg-[#0A0A0A]"
+                />
+                <label htmlFor="isPinned" className="ml-2 text-sm text-gray-300 select-none">
+                  Komentar Disematkan (Pinned)
+                </label>
+              </div>
+            </>
           )}
         </div>
 
@@ -359,6 +419,28 @@ export function CommentForm({ state, onChange, onRandomize }: Props) {
              </button>
            </div>
         </div>
+
+        {state.platform === 'tiktok' && state.tiktokTemplate === 'reply' && (
+          <div className="pt-2">
+            <div className="flex-1">
+              <label className="block text-[10px] font-bold text-gray-500 uppercase mb-1.5">Warna Bubble</label>
+              <div className="flex items-center gap-2 h-[24px]">
+                <input 
+                  type="color" 
+                  value={state.replyBubbleColor || '#ffffff'}
+                  onChange={e => onChange({ replyBubbleColor: e.target.value })}
+                  className="w-12 h-6 rounded cursor-pointer bg-transparent border-0 p-0"
+                />
+                <button 
+                  onClick={() => onChange({ replyBubbleColor: '' })}
+                  className="text-[10px] text-gray-500 hover:text-gray-300 underline"
+                >
+                  Reset
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {isLiveMode && (
            <div className="pt-4 border-t border-[#2D2D2D] mt-2">
@@ -466,6 +548,133 @@ export function CommentForm({ state, onChange, onRandomize }: Props) {
         )}
 
       </div>
+
+      {!isLiveMode && (
+        <div className="pt-4 border-t border-[#2D2D2D] mt-4">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-gray-400">Balasan Komentar (Nested Replies)</h3>
+            <button 
+              onClick={addNestedReply}
+              className="flex items-center text-[10px] bg-blue-600 hover:bg-blue-500 text-white px-2 py-1.5 rounded transition"
+            >
+              <Plus className="w-3 h-3 mr-1" />
+              TAMBAH
+            </button>
+          </div>
+          
+          <div className="space-y-4">
+            {(state.nestedReplies || []).map((reply, index) => (
+              <div key={reply.id} className="p-3 bg-[#0A0A0A] border border-[#2D2D2D] rounded-xl relative">
+                <button 
+                  onClick={() => removeNestedReply(reply.id)}
+                  className="absolute top-2 right-2 text-gray-500 hover:text-red-400 transition"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+                <div className="text-[10px] text-gray-500 mb-2 font-bold uppercase">Balasan {index + 1}</div>
+                
+                <div className="flex items-center space-x-3 mb-3">
+                  {reply.avatarUrl ? (
+                    <img src={reply.avatarUrl} className="w-8 h-8 rounded-full border border-[#2D2D2D] bg-[#141414]" alt="Avatar" />
+                  ) : (
+                    <div className="w-8 h-8 rounded-full border border-dashed border-[#2D2D2D] bg-[#141414]"></div>
+                  )}
+                  <button 
+                    onClick={() => {
+                      const isMale = Math.random() > 0.5;
+                      const array = isMale ? maleUsernames : femaleUsernames;
+                      const newName = array[Math.floor(Math.random() * array.length)];
+                      const newHandle = `@${newName.replace(/\s+/g, '').toLowerCase()}${Math.floor(Math.random() * 100)}`;
+                      updateNestedReply(reply.id, { 
+                        avatarUrl: getRandomAvatarUrl(isMale ? 'male' : 'female'),
+                        username: newName,
+                        handle: newHandle
+                      });
+                    }}
+                    className="text-[10px] bg-[#141414] hover:bg-[#2D2D2D] border border-[#2D2D2D] px-2 py-1 rounded text-gray-300 transition"
+                  >
+                    <Shuffle className="w-3 h-3 inline mr-1" /> Acak Profil
+                  </button>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-3 mb-3">
+                  <div>
+                    <label className="block text-[10px] font-bold text-gray-500 uppercase mb-1">Username</label>
+                    <input 
+                      type="text" 
+                      value={reply.username}
+                      onChange={e => updateNestedReply(reply.id, { username: e.target.value })}
+                      className="w-full bg-[#141414] border border-[#2D2D2D] rounded px-2 py-1.5 text-xs text-white outline-none focus:border-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-bold text-gray-500 uppercase mb-1">Handle</label>
+                    <input 
+                      type="text" 
+                      value={reply.handle || ''}
+                      onChange={e => updateNestedReply(reply.id, { handle: e.target.value })}
+                      className="w-full bg-[#141414] border border-[#2D2D2D] rounded px-2 py-1.5 text-xs text-white outline-none focus:border-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-bold text-gray-500 uppercase mb-1">Waktu</label>
+                    <input 
+                      type="text" 
+                      value={reply.timestamp}
+                      onChange={e => updateNestedReply(reply.id, { timestamp: e.target.value })}
+                      className="w-full bg-[#141414] border border-[#2D2D2D] rounded px-2 py-1.5 text-xs text-white outline-none focus:border-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-bold text-gray-500 uppercase mb-1">Likes</label>
+                    <input 
+                      type="text" 
+                      value={reply.likeCount}
+                      onChange={e => updateNestedReply(reply.id, { likeCount: e.target.value })}
+                      className="w-full bg-[#141414] border border-[#2D2D2D] rounded px-2 py-1.5 text-xs text-white outline-none focus:border-blue-500"
+                    />
+                  </div>
+                  <div className="col-span-2 flex gap-4">
+                    <label className="flex items-center">
+                      <input 
+                        type="checkbox" 
+                        checked={reply.isVerified}
+                        onChange={e => updateNestedReply(reply.id, { isVerified: e.target.checked })}
+                        className="w-3.5 h-3.5 rounded border-[#2D2D2D] text-blue-600 focus:ring-blue-600 bg-[#141414]"
+                      />
+                      <span className="ml-2 text-[10px] text-gray-300 select-none">Verified</span>
+                    </label>
+                    <label className="flex items-center">
+                      <input 
+                        type="checkbox" 
+                        checked={reply.creatorLiked}
+                        onChange={e => updateNestedReply(reply.id, { creatorLiked: e.target.checked })}
+                        className="w-3.5 h-3.5 rounded border-[#2D2D2D] text-red-500 focus:ring-red-600 bg-[#141414]"
+                      />
+                      <span className="ml-2 text-[10px] text-gray-300 select-none">Creator Liked</span>
+                    </label>
+                  </div>
+                </div>
+                
+                <div>
+                  <label className="block text-[10px] font-bold text-gray-500 uppercase mb-1">Komentar</label>
+                  <textarea 
+                    value={reply.commentText}
+                    onChange={e => updateNestedReply(reply.id, { commentText: e.target.value })}
+                    className="w-full bg-[#141414] border border-[#2D2D2D] rounded px-2 py-1.5 text-xs text-white outline-none focus:border-blue-500 resize-none h-16"
+                  />
+                </div>
+              </div>
+            ))}
+            
+            {(!state.nestedReplies || state.nestedReplies.length === 0) && (
+              <div className="text-center py-4 text-xs text-gray-500 border border-dashed border-[#2D2D2D] rounded-xl">
+                Belum ada balasan komentar.
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

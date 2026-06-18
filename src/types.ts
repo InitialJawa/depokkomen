@@ -10,6 +10,18 @@ export interface AdditionalComment {
   commentText: string;
 }
 
+export interface NestedReply {
+  id: string;
+  avatarUrl: string;
+  username: string;
+  handle: string;
+  isVerified: boolean;
+  commentText: string;
+  timestamp: string;
+  likeCount: string;
+  creatorLiked: boolean;
+}
+
 export interface CommentState {
   platform: Platform;
   tiktokTemplate: TikTokTemplate;
@@ -26,7 +38,11 @@ export interface CommentState {
   replyCount: string;
   timestamp: string;
   creatorLiked: boolean;
+  isPinned: boolean;
+  fontSize: number;
+  replyBubbleColor: string;
   additionalComments: AdditionalComment[];
+  nestedReplies: NestedReply[];
   hideLiveBackground: boolean;
   fontFamily: 'roboto' | 'san-francisco';
 }
@@ -47,7 +63,11 @@ export const defaultState: CommentState = {
   replyCount: '24',
   timestamp: '2j lalu',
   creatorLiked: false,
+  isPinned: false,
+  fontSize: 15,
+  replyBubbleColor: '',
   additionalComments: [],
+  nestedReplies: [],
   hideLiveBackground: false,
-  fontFamily: 'roboto',
+  fontFamily: 'san-francisco',
 };

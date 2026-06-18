@@ -36,7 +36,7 @@ export function IGLivePreview({ state, onThemeToggle }: Props) {
                </div>
             )}
           </div>
-          <div className={`${textColor} text-[14px] leading-[1.3] break-words whitespace-pre-wrap font-medium ${state.hideLiveBackground && !isDark ? 'drop-shadow-md' : 'drop-shadow-sm'}`}>
+          <div className={`${textColor} leading-[1.3] break-words whitespace-pre-wrap font-medium ${state.hideLiveBackground && !isDark ? 'drop-shadow-md' : 'drop-shadow-sm'}`} style={{ fontSize: `${state.fontSize || 14}px` }}>
             {renderFormattedText(state.commentText)}
           </div>
         </div>
@@ -61,7 +61,7 @@ export function IGLivePreview({ state, onThemeToggle }: Props) {
                  </div>
               )}
             </div>
-            <div className={`${textColor} text-[14px] leading-[1.3] break-words whitespace-pre-wrap font-medium ${state.hideLiveBackground && !isDark ? 'drop-shadow-md' : 'drop-shadow-sm'}`}>
+            <div className={`${textColor} leading-[1.3] break-words whitespace-pre-wrap font-medium ${state.hideLiveBackground && !isDark ? 'drop-shadow-md' : 'drop-shadow-sm'}`} style={{ fontSize: `${state.fontSize || 14}px` }}>
               {renderFormattedText(comment.commentText)}
             </div>
           </div>

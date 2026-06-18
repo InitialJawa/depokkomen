@@ -18,7 +18,15 @@ export function TwitterPreview({ state, onThemeToggle }: Props) {
   const mutedColor = isDark ? 'text-[#71767B]' : 'text-[#536471]';
 
   return (
-    <div className={`w-fit max-w-lg sm:max-w-xl ${bgColor} p-4 text-left ${nameColor} border ${borderColor}`}>
+    <div className={`w-fit max-w-lg sm:max-w-xl ${bgColor} p-4 text-left ${nameColor} border ${borderColor} flex flex-col`}>
+      {state.isPinned && (
+        <div className={`flex items-center text-[13px] font-bold mb-2 pl-9 ${mutedColor}`}>
+          <svg className="w-3.5 h-3.5 mr-2" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12 1.95L1.95 12 12 22.05 22.05 12 12 1.95zM12 19L5 12l7-7 7 7-7 7z"/> {/* Dummy Pinned Icon */}
+          </svg>
+          Disematkan
+        </div>
+      )}
       <div className="flex items-start">
         {/* Avatar */}
         {state.avatarUrl && (
@@ -45,7 +53,10 @@ export function TwitterPreview({ state, onThemeToggle }: Props) {
             </span>
           </div>
           
-          <div className={`text-[15px] leading-normal break-words whitespace-pre-wrap mb-3 ${textColor}`}>
+          <div 
+            className={`leading-normal break-words whitespace-pre-wrap mb-3 ${textColor}`}
+            style={{ fontSize: `${state.fontSize || 15}px` }}
+          >
             {renderFormattedText(state.commentText)}
           </div>
           
@@ -85,6 +96,47 @@ export function TwitterPreview({ state, onThemeToggle }: Props) {
               </div>
             </div>
           </div>
+          
+          {/* Nested Replies */}
+          {state.nestedReplies && state.nestedReplies.length > 0 && (
+            <div className="mt-2 pt-2 border-t border-transparent space-y-4">
+              {state.nestedReplies.map((reply, i) => (
+                <div key={reply.id} className="flex flex-col relative mt-2">
+                  <div className="absolute top-0 bottom-0 left-[-22px] w-0.5 bg-gray-300 dark:bg-gray-700"></div>
+                  <div className="flex items-start">
+                    <img src={reply.avatarUrl} alt="Avatar" className="w-10 h-10 rounded-full object-cover mr-3 bg-neutral-800 shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center text-[15px] mb-0.5">
+                        <span className={`font-bold ${nameColor} mr-1 truncate hover:underline cursor-pointer`}>
+                          {reply.username}
+                        </span>
+                        {reply.isVerified && (
+                          <svg className="w-[18px] h-[18px] text-[#1D9BF0] mr-1 shrink-0" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M22.5 12.5c0-1.58-.875-2.95-2.148-3.6.154-.435.238-.905.238-1.4 0-2.21-1.71-3.998-3.918-3.998-.47 0-.92.084-1.336.25C14.818 2.415 13.51 1.5 12 1.5s-2.816.917-3.337 2.25c-.416-.165-.866-.25-1.336-.25-2.21 0-3.918 1.79-3.918 4 0 .495.084.965.238 1.4-1.273.65-2.148 2.02-2.148 3.6 0 1.46.74 2.746 1.865 3.45-.065.29-.092.593-.092.895 0 2.21 1.71 3.998 3.918 3.998.47 0 .92-.084 1.336-.25C8.818 21.585 10.126 22.5 12 22.5c1.516 0 2.816-.917 3.337-2.25.416.165.866.25 1.336.25 2.21 0 3.918-1.79 3.918-4 0-.302-.027-.605-.092-.895 1.124-.704 1.865-1.99 1.865-3.45zm-10.46 4.38l-4.24-4.24 1.41-1.41 2.83 2.83 6.36-6.36 1.41 1.41-7.77 7.77z"/>
+                          </svg>
+                        )}
+                        <span className={`${mutedColor} truncate`}>{reply.handle}</span>
+                        <span className={`${mutedColor} mx-1`}>·</span>
+                        <span className={`${mutedColor} hover:underline cursor-pointer shrink-0`}>{reply.timestamp.replace(' lalu', '')}</span>
+                      </div>
+                      <div className={`leading-normal break-words whitespace-pre-wrap mb-3 ${textColor}`} style={{ fontSize: `${state.fontSize || 15}px` }}>
+                        {renderFormattedText(reply.commentText)}
+                      </div>
+                      <div className={`flex items-center justify-between ${mutedColor} max-w-sm`}>
+                        <div className="flex items-center group cursor-pointer"><MessageCircle className="w-4 h-4" strokeWidth={2} /></div>
+                        <div className="flex items-center group cursor-pointer"><Repeat2 className="w-4 h-4" strokeWidth={2} /></div>
+                        <div className="flex items-center group cursor-pointer">
+                          <Heart className="w-4 h-4" strokeWidth={2} /><span className="text-[13px] ml-1">{reply.likeCount !== '0' ? reply.likeCount : ''}</span>
+                        </div>
+                        <div className="flex items-center group cursor-pointer"><BarChart3 className="w-4 h-4" strokeWidth={2} /></div>
+                        <div className="flex items-center group cursor-pointer"><Upload className="w-4 h-4" strokeWidth={2} /></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
         
         {/* Top right menu icon dummy */}

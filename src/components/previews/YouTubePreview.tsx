@@ -18,7 +18,15 @@ export function YouTubePreview({ state, onThemeToggle }: Props) {
   const linkColor = isDark ? 'text-[#3EA6FF]' : 'text-[#065FD4]';
 
   return (
-    <div className={`w-fit max-w-lg sm:max-w-xl ${bgColor} p-4 text-left`}>
+    <div className={`w-fit max-w-lg sm:max-w-xl ${bgColor} p-4 text-left flex flex-col`}>
+      {state.isPinned && (
+        <div className={`flex items-center text-[12px] font-medium mb-3 pl-14 ${mutedColor}`}>
+          <svg className="w-3.5 h-3.5 mr-1.5" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M16 12V4h1V2H7v2h1v8l-2 2v2h4.5v6.5l1.5 1.5 1.5-1.5V16H18v-2l-2-2z"/>
+          </svg>
+          Disematkan oleh @{state.username.replace(/\s+/g, '').toLowerCase()}
+        </div>
+      )}
       <div className="flex items-start">
         {/* Avatar */}
         {state.avatarUrl && (
@@ -41,7 +49,10 @@ export function YouTubePreview({ state, onThemeToggle }: Props) {
             </span>
           </div>
           
-          <p className={`text-[14px] ${textColor} leading-[1.4] break-words whitespace-pre-wrap mb-2`}>
+          <p 
+            className={`${textColor} leading-[1.4] break-words whitespace-pre-wrap mb-2`}
+            style={{ fontSize: `${state.fontSize || 14}px` }}
+          >
             {renderFormattedText(state.commentText)}
           </p>
           
@@ -74,15 +85,62 @@ export function YouTubePreview({ state, onThemeToggle }: Props) {
             )}
           </div>
           
-          {state.replyCount && parseInt(state.replyCount.replace(/\D/g, '')) > 0 && (
-            <div className="flex items-center mt-1 cursor-pointer">
-               <svg className={`w-4 h-4 ${linkColor} mr-2`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-               </svg>
-               <span className={`text-[14px] font-medium ${linkColor}`}>
-                 {state.replyCount} balasan
-               </span>
+          {/* Nested Replies or Reply Count dummy */}
+          {state.nestedReplies && state.nestedReplies.length > 0 ? (
+            <div className="mt-4 space-y-4">
+              {state.nestedReplies.map(reply => (
+                <div key={reply.id} className="flex items-start">
+                  <img src={reply.avatarUrl} alt="Avatar" className={`w-[24px] h-[24px] rounded-full object-cover mr-3 bg-gray-200 shrink-0 ${isDark ? 'border border-gray-800' : ''}`} />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center mb-0.5">
+                      <span className={`text-[12px] font-medium ${textColor} mr-1 truncate max-w-[150px]`}>
+                        @{reply.username.replace(/\s+/g, '').toLowerCase()}
+                      </span>
+                      {reply.isVerified && (
+                        <svg className={`w-3 h-3 ${mutedColor} mr-2 shrink-0`} viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                        </svg>
+                      )}
+                      <span className={`text-[11px] ${mutedColor}`}>{reply.timestamp}</span>
+                    </div>
+                    <p className={`${textColor} leading-[1.4] break-words whitespace-pre-wrap mb-1.5`} style={{ fontSize: `${(state.fontSize || 14) - 1}px` }}>
+                      {renderFormattedText(reply.commentText)}
+                    </p>
+                    <div className="flex items-center space-x-1">
+                      <div className="flex items-center cursor-pointer p-1">
+                        <ThumbsUp className={`w-[14px] h-[14px] ${textColor}`} strokeWidth={1.5} />
+                        {reply.likeCount && reply.likeCount !== '0' && <span className={`text-[11px] ${mutedColor} ml-1.5`}>{reply.likeCount}</span>}
+                      </div>
+                      <div className="flex items-center cursor-pointer p-1 px-2">
+                        <ThumbsDown className={`w-[14px] h-[14px] ${textColor}`} strokeWidth={1.5} />
+                      </div>
+                      <span className={`text-[11px] font-medium ${textColor} ml-1 ${btnHover} px-2 py-1.5 rounded-full cursor-pointer`}>Balas</span>
+                      {reply.creatorLiked && (
+                        <div className="flex items-center ml-2 cursor-pointer relative">
+                          <img src={reply.avatarUrl} alt="Creator" className="w-4 h-4 rounded-full" />
+                          <div className="absolute -bottom-1 -right-1 bg-red-600 rounded-full p-[1px] border border-white dark:border-black">
+                            <svg className="w-2 h-2 text-white" viewBox="0 0 24 24" fill="currentColor">
+                              <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                            </svg>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
+          ) : (
+            state.replyCount && parseInt(state.replyCount.replace(/\D/g, '')) > 0 && (
+              <div className="flex items-center mt-1 cursor-pointer">
+                 <svg className={`w-4 h-4 ${linkColor} mr-2`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                 </svg>
+                 <span className={`text-[14px] font-medium ${linkColor}`}>
+                   {state.replyCount} balasan
+                 </span>
+              </div>
+            )
           )}
         </div>
         
