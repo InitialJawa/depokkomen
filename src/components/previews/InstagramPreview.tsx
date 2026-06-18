@@ -36,7 +36,7 @@ export function InstagramPreview({ state, onThemeToggle }: Props) {
             <span>{renderFormattedText(state.commentText)}</span>
           </p>
           
-          <div className="flex items-center mt-2 space-x-3">
+          <div className="flex flex-wrap items-center mt-2 gap-x-3 gap-y-1">
             <span className={`text-[12px] ${mutedColor} font-medium`}>
               {state.timestamp.replace(' lalu', '')}
             </span>
@@ -53,8 +53,20 @@ export function InstagramPreview({ state, onThemeToggle }: Props) {
             </button>
           </div>
           
+          {state.creatorLiked && (
+            <div className="flex items-center mt-1">
+              <img src={state.avatarUrl} alt="Creator" className="w-4 h-4 border border-white dark:border-black rounded-full" />
+              <div className="bg-red-500 w-3 h-3 rounded-full flex items-center justify-center -ml-1 border-2 border-white dark:border-black z-10">
+                <Heart className="w-2 h-2 text-white" fill="currentColor" />
+              </div>
+              <span className={`text-[11px] ml-1.5 ${mutedColor}`}>
+                Disukai oleh pembuat
+              </span>
+            </div>
+          )}
+
           {/* Thread indicator dummy */}
-          <div className="flex items-center mt-3 cursor-pointer">
+          <div className="flex items-center mt-2 cursor-pointer">
              <div className="w-6 h-[1px] bg-gray-300 mr-3"></div>
              <span className={`text-[12px] ${mutedColor} font-medium`}>Lihat terjemahan</span>
           </div>

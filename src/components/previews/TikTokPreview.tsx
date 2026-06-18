@@ -68,6 +68,11 @@ export function TikTokPreview({ state, onThemeToggle }: Props) {
               <button className={`text-[13px] ${isDark ? 'text-neutral-500 hover:text-neutral-300' : 'text-gray-500 hover:text-gray-700'} font-semibold tracking-wide`}>
                 Balas
               </button>
+              {state.creatorLiked && (
+                <div className={`flex items-center text-[12px] font-medium leading-none px-1.5 py-0.5 rounded-sm ${isDark ? 'bg-neutral-800 text-[#FE2B54]' : 'bg-gray-100 text-[#FE2B54]'}`}>
+                  Disukai oleh kreator
+                </div>
+              )}
             </div>
           )}
         </div>

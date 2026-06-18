@@ -293,10 +293,38 @@ export function CommentForm({ state, onChange, onRandomize }: Props) {
               Verified Badge (Centang Biru)
             </label>
           </div>
+          
+          {(state.platform === 'tiktok' || state.platform === 'youtube' || state.platform === 'instagram') && (
+            <div className="col-span-2 flex items-center mt-1">
+              <input 
+                type="checkbox" 
+                id="creatorLiked" 
+                checked={state.creatorLiked}
+                onChange={e => onChange({ creatorLiked: e.target.checked })}
+                className="w-4 h-4 rounded border-[#2D2D2D] text-red-500 focus:ring-red-500 focus:ring-offset-[#141414] bg-[#0A0A0A]"
+              />
+              <label htmlFor="creatorLiked" className="ml-2 text-sm text-gray-300 select-none">
+                Disukai oleh Kreator (Creator Liked)
+              </label>
+            </div>
+          )}
         </div>
 
         <div>
-           <label className="block text-[10px] font-bold text-gray-500 uppercase mb-1.5">Isi Komentar</label>
+           <div className="flex justify-between items-end mb-1.5">
+             <label className="block text-[10px] font-bold text-gray-500 uppercase">Isi Komentar</label>
+             <div className="flex gap-1">
+                {['👍', '❤️', '😂', '🔥', '🙏', '😭', '😍'].map(emoji => (
+                  <button 
+                    key={emoji}
+                    onClick={() => onChange({ commentText: state.commentText + emoji })}
+                    className="text-sm hover:bg-[#2D2D2D] w-6 h-6 rounded flex items-center justify-center transition"
+                  >
+                    {emoji}
+                  </button>
+                ))}
+             </div>
+           </div>
            <textarea 
               ref={textareaRef}
               value={state.commentText} 

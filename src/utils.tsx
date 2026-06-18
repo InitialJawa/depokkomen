@@ -130,6 +130,18 @@ export function renderFormattedText(text: string) {
       const content = part.substring(5, part.length - 6);
       return <span key={index} className="opacity-0 select-none">-</span>;
     }
-    return <React.Fragment key={index}>{part}</React.Fragment>;
+    
+    // Process mentions and hashtags
+    const words = part.split(/([@#][\w_]+)/g);
+    return (
+      <React.Fragment key={index}>
+        {words.map((word, wIdx) => {
+          if (word.startsWith('@') || word.startsWith('#')) {
+            return <span key={wIdx} className="text-[#0057D9] dark:text-[#3EA6FF] font-semibold">{word}</span>;
+          }
+          return <React.Fragment key={wIdx}>{word}</React.Fragment>;
+        })}
+      </React.Fragment>
+    );
   });
 }

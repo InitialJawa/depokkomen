@@ -25,6 +25,7 @@ export interface CommentState {
   retweetCount: string;
   replyCount: string;
   timestamp: string;
+  creatorLiked: boolean;
   additionalComments: AdditionalComment[];
   hideLiveBackground: boolean;
   fontFamily: 'roboto' | 'san-francisco';
@@ -45,6 +46,7 @@ export const defaultState: CommentState = {
   retweetCount: '800',
   replyCount: '24',
   timestamp: '2j lalu',
+  creatorLiked: false,
   additionalComments: [],
   hideLiveBackground: false,
   fontFamily: 'roboto',
