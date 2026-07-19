@@ -1,5 +1,5 @@
 import React from 'react';
-import { ZoomIn, ZoomOut, Maximize, Grid3X3, Crosshair } from 'lucide-react';
+import { ZoomIn, ZoomOut, Maximize, Grid3X3, Crosshair, Sun, Moon } from 'lucide-react';
 import { Button } from '../ui';
 
 interface Props {
@@ -8,13 +8,42 @@ interface Props {
   showGrid: boolean;
   setShowGrid: (show: boolean) => void;
   centerCanvas: () => void;
+  cardTheme: 'light' | 'dark';
+  onCardThemeChange: (theme: 'light' | 'dark') => void;
 }
 
-export function Toolbar({ scale, setScale, showGrid, setShowGrid, centerCanvas }: Props) {
+export function Toolbar({ scale, setScale, showGrid, setShowGrid, centerCanvas, cardTheme, onCardThemeChange }: Props) {
   const predefinedScales = [0.5, 0.75, 1, 1.25, 1.5];
 
   return (
     <div className="absolute bottom-16 left-1/2 -translate-x-1/2 flex items-center gap-1.5 p-1.5 bg-[var(--panel-bg)]/85 backdrop-blur-md border border-[var(--panel-border)] shadow-lg rounded-xl z-20">
+      {/* Premium On/Off Switch style toggle with symbols for light/dark card background */}
+      <button
+        onClick={() => onCardThemeChange(cardTheme === 'light' ? 'dark' : 'light')}
+        className="relative flex items-center h-8 w-14 rounded-full bg-[var(--root-bg)] border border-[var(--panel-border)] p-1 transition-all duration-300 cursor-pointer select-none group focus:outline-none hover:border-blue-500/50"
+        title={`Change Card Background Theme to ${cardTheme === 'light' ? 'Dark' : 'Light'}`}
+      >
+        <div className="flex w-full justify-between items-center px-0.5 text-[var(--text-muted)] pointer-events-none">
+          <Sun className="w-3.5 h-3.5 opacity-40 group-hover:opacity-60 transition-opacity" />
+          <Moon className="w-3.5 h-3.5 opacity-40 group-hover:opacity-60 transition-opacity" />
+        </div>
+        <div 
+          className={`absolute top-[3px] left-[3px] flex items-center justify-center w-6 h-6 rounded-full shadow-md transition-all duration-300 ${
+            cardTheme === 'dark' 
+              ? 'translate-x-6 bg-slate-800 text-indigo-400 border border-slate-700' 
+              : 'translate-x-0 bg-white text-amber-500 border border-gray-100'
+          }`}
+        >
+          {cardTheme === 'light' ? (
+            <Sun className="w-3.5 h-3.5" />
+          ) : (
+            <Moon className="w-3.5 h-3.5" />
+          )}
+        </div>
+      </button>
+
+      <div className="w-[1px] h-4 bg-[var(--panel-border)] mx-1" />
+
       <Button variant="ghost" onClick={() => setScale(Math.max(0.25, scale - 0.1))} title="Zoom Out">
         <ZoomOut className="w-4 h-4" />
       </Button>

@@ -22,9 +22,12 @@ import { Sun, Moon } from 'lucide-react';
 interface Props {
   state: CommentState;
   onStateChange: (state: Partial<CommentState>) => void;
+  isPremium: boolean;
+  onUpgradeClick: () => void;
+  incrementExportCount: () => boolean;
 }
 
-export function PreviewArea({ state, onStateChange }: Props) {
+export function PreviewArea({ state, onStateChange, isPremium, onUpgradeClick, incrementExportCount }: Props) {
   const previewRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [isExporting, setIsExporting] = useState(false);
@@ -43,6 +46,13 @@ export function PreviewArea({ state, onStateChange }: Props) {
 
   const handleExport = async (exportScale: number, format: 'png' | 'jpg' | 'webp' | 'transparent') => {
     if (!previewRef.current) return;
+    
+    // Check and increment export limit
+    const allowed = incrementExportCount();
+    if (!allowed) {
+      onUpgradeClick();
+      return;
+    }
     
     setIsExporting(true);
     try {
@@ -93,8 +103,13 @@ export function PreviewArea({ state, onStateChange }: Props) {
 
   const getFontFamilyStyle = () => {
     switch (state.fontFamily) {
-      case 'roboto': return { fontFamily: 'Roboto, Arial, sans-serif' };
-      case 'san-francisco': return { fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif' };
+      case 'roboto': return { fontFamily: '"Roboto", sans-serif' };
+      case 'inter': return { fontFamily: '"Inter", sans-serif' };
+      case 'space-grotesk': return { fontFamily: '"Space Grotesk", sans-serif' };
+      case 'playfair-display': return { fontFamily: '"Playfair Display", serif' };
+      case 'poppins': return { fontFamily: '"Poppins", sans-serif' };
+      case 'jetbrains-mono': return { fontFamily: '"JetBrains Mono", monospace' };
+      case 'san-francisco': return { fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "SF Pro", "Segoe UI", Roboto, Helvetica, Arial, sans-serif' };
       default: return {};
     }
   };
@@ -132,6 +147,8 @@ export function PreviewArea({ state, onStateChange }: Props) {
         showGrid={showGrid} 
         setShowGrid={setShowGrid} 
         centerCanvas={centerCanvas} 
+        cardTheme={state.theme}
+        onCardThemeChange={(theme) => onStateChange({ theme })}
       />
 
       <ExportCard onExport={handleExport} isExporting={isExporting} />
@@ -189,7 +206,7 @@ export function PreviewArea({ state, onStateChange }: Props) {
         >
           <div 
             ref={previewRef} 
-            className={`flex justify-center transition-shadow ${state.hasDropShadow ? 'drop-shadow-[0_20px_40px_rgba(0,0,0,0.15)]' : ''}`}
+            className={`flex justify-center transition-shadow preview-card-font ${state.hasDropShadow ? 'drop-shadow-[0_20px_40px_rgba(0,0,0,0.15)]' : ''}`}
             style={getFontFamilyStyle()}
           >
              {getPreviewComponent()}

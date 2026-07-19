@@ -44,7 +44,7 @@ export interface CommentState {
   additionalComments: AdditionalComment[];
   nestedReplies: NestedReply[];
   hideLiveBackground: boolean;
-  fontFamily: 'roboto' | 'san-francisco';
+  fontFamily: 'roboto' | 'san-francisco' | 'inter' | 'space-grotesk' | 'playfair-display' | 'poppins' | 'jetbrains-mono';
   hasDropShadow: boolean;
   padding: number;
   borderRadius: number;

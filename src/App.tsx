@@ -5,6 +5,7 @@ import { Sidebar } from './components/Sidebar';
 import { PreviewArea } from './components/PreviewArea';
 import { defaultState, Platform } from './types';
 import { getRandomState } from './utils';
+import { UpgradeModal } from './components/UpgradeModal';
 import { 
   TikTokColoredIcon, 
   InstagramColoredIcon, 
@@ -26,6 +27,64 @@ import {
 export default function App() {
   const [state, setState] = useState(defaultState);
   const [appTheme, setAppTheme] = useState<'light' | 'dark'>('dark');
+
+  // SaaS States & LocalStorage Integration
+  const [isPremium, setIsPremium] = useState<boolean>(() => {
+    return localStorage.getItem('depokkomen_is_premium') === 'true';
+  });
+
+  const [exportCount, setExportCount] = useState<number>(() => {
+    const today = new Date().toISOString().split('T')[0];
+    const storedDate = localStorage.getItem('depokkomen_last_export_date');
+    if (storedDate !== today) {
+      localStorage.setItem('depokkomen_last_export_date', today);
+      localStorage.setItem('depokkomen_export_count', '0');
+      return 0;
+    }
+    const count = localStorage.getItem('depokkomen_export_count');
+    return count ? parseInt(count, 10) : 0;
+  });
+
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+
+  // Handlers for premium simulation
+  const handleUpgradeSuccess = () => {
+    setIsPremium(true);
+    localStorage.setItem('depokkomen_is_premium', 'true');
+  };
+
+  const handleDowngrade = () => {
+    setIsPremium(false);
+    localStorage.setItem('depokkomen_is_premium', 'false');
+    // Also reset export limit
+    setExportCount(0);
+    localStorage.setItem('depokkomen_export_count', '0');
+  };
+
+  const incrementExportCount = (): boolean => {
+    if (isPremium) return true;
+
+    const today = new Date().toISOString().split('T')[0];
+    const storedDate = localStorage.getItem('depokkomen_last_export_date');
+    let currentCount = exportCount;
+
+    // Reset daily if date changed
+    if (storedDate !== today) {
+      localStorage.setItem('depokkomen_last_export_date', today);
+      localStorage.setItem('depokkomen_export_count', '0');
+      setExportCount(0);
+      currentCount = 0;
+    }
+
+    if (currentCount >= 30) {
+      return false; // Limit reached!
+    }
+
+    const nextCount = currentCount + 1;
+    setExportCount(nextCount);
+    localStorage.setItem('depokkomen_export_count', nextCount.toString());
+    return true;
+  };
 
   // Sync dark class on document element
   useEffect(() => {
@@ -136,6 +195,9 @@ export default function App() {
               onChange={handleStateChange}
               onRandomize={handleRandomize}
               onReset={handleReset}
+              isPremium={isPremium}
+              exportCount={exportCount}
+              onUpgradeClick={() => setShowUpgradeModal(true)}
             />
             
             {/* Live Preview Area */}
@@ -143,6 +205,9 @@ export default function App() {
                <PreviewArea 
                  state={state} 
                  onStateChange={handleStateChange}
+                 isPremium={isPremium}
+                 onUpgradeClick={() => setShowUpgradeModal(true)}
+                 incrementExportCount={incrementExportCount}
                />
             </div>
           </div>
@@ -160,6 +225,16 @@ export default function App() {
           </div>
         </footer>
       </div>
+
+      {/* Upgrade SaaS Billing Modal */}
+      <UpgradeModal 
+        isOpen={showUpgradeModal}
+        onClose={() => setShowUpgradeModal(false)}
+        onUpgradeSuccess={handleUpgradeSuccess}
+        isPremium={isPremium}
+        onDowngrade={handleDowngrade}
+        exportCount={exportCount}
+      />
     </div>
   );
 }

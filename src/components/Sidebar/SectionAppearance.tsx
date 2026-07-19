@@ -11,43 +11,19 @@ interface Props {
 export function SectionAppearance({ state, onChange }: Props) {
   return (
     <div className="flex flex-col gap-5">
-      {/* Comment Card Theme */}
-      <div>
-        <Label>Comment Card Theme</Label>
-        <div className="flex bg-[var(--root-bg)] border border-[var(--panel-border)] rounded-xl p-1 shadow-inner">
-          <button
-            onClick={() => onChange({ theme: 'light' })}
-            className={`flex-1 py-2 text-xs font-semibold rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
-              state.theme === 'light' 
-                ? 'bg-[var(--panel-bg)] shadow-sm text-[var(--root-fg)] font-bold border border-[var(--panel-border)]' 
-                : 'text-[var(--text-muted)] hover:text-[var(--root-fg)]'
-            }`}
-          >
-            <Sun className="w-3.5 h-3.5" />
-            Light Post
-          </button>
-          <button
-            onClick={() => onChange({ theme: 'dark' })}
-            className={`flex-1 py-2 text-xs font-semibold rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
-              state.theme === 'dark' 
-                ? 'bg-[var(--panel-bg)] shadow-sm text-[var(--root-fg)] font-bold border border-[var(--panel-border)]' 
-                : 'text-[var(--text-muted)] hover:text-[var(--root-fg)]'
-            }`}
-          >
-            <Moon className="w-3.5 h-3.5" />
-            Dark Post
-          </button>
-        </div>
-      </div>
-
       <div>
         <Label>Font Family</Label>
         <Select 
           value={state.fontFamily || 'san-francisco'}
           onChange={(e) => onChange({ fontFamily: e.target.value as any })}
         >
-          <option value="san-francisco">San Francisco (iOS)</option>
+          <option value="san-francisco">San Francisco (System iOS)</option>
           <option value="roboto">Roboto (Android)</option>
+          <option value="inter">Inter (Modern Sans)</option>
+          <option value="space-grotesk">Space Grotesk (Tech Display)</option>
+          <option value="poppins">Poppins (Clean Round)</option>
+          <option value="playfair-display">Playfair Display (Serif)</option>
+          <option value="jetbrains-mono">JetBrains Mono (Code)</option>
         </Select>
       </div>
 
