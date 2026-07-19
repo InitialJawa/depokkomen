@@ -3,7 +3,7 @@
     <div style="width:40px; height:40px; border:4px solid white; border-radius:8px;"></div>
   </div>
 
-  # 🎨 depokkomen
+  # 🎨 SocialCanvas
   
   **Generator Komentar Sosial Media Lengkap & Realistis!**
   
@@ -48,7 +48,7 @@ npm run build
 
 ## 🛠️ Teknologi yang Digunakan
 
-Aplikasi **depokkomen** dikembangkan dengan stack *frontend* yang *modern* dan cepat:
+Aplikasi **SocialCanvas** dikembangkan dengan stack *frontend* yang *modern* dan cepat:
 - **Platform:** React dengan TypeScript untuk komponen *type-safe*.
 - **Styling UI:** Tailwind CSS utuk styling cepat dan responsif serta ikon-ikon elegan dari Lucide React.
 - **Build Tool:** Vite.

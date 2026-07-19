@@ -1,7 +1,7 @@
-# Product Requirements Document (PRD): depokkomen
+# Product Requirements Document (PRD): SocialCanvas
 
 ## 1. Product Overview
-**depokkomen** is a robust, web-based tool designed to generate realistic, customizable social media comments screenshots. It allows content creators, educators, and marketers to simulate comment sections across various major and trending social platforms. By providing pixel-perfect replications of UI components, users can effortlessly create dummy comments to be used in videos, presentations, memes, or illustrations.
+**SocialCanvas** is a robust, web-based tool designed to generate realistic, customizable social media comments screenshots. It allows content creators, educators, and marketers to simulate comment sections across various major and trending social platforms. By providing pixel-perfect replications of UI components, users can effortlessly create dummy comments to be used in videos, presentations, memes, or illustrations.
 
 ### 1.1 Objective
 To provide a fast, customizable, and high-fidelity social media comment generator that eliminates the need for complex photo-editing software like Photoshop to create mock comments.

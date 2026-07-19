@@ -6,9 +6,19 @@ import { renderFormattedText } from '../../utils';
 interface Props {
   state: CommentState;
   onThemeToggle?: () => void;
+  onReplyClick?: (replyId?: string) => void;
+  onEditReply?: (replyId: string) => void;
 }
 
-export function InstagramPreview({ state, onThemeToggle }: Props) {
+export function InstagramPreview({ state, onThemeToggle, onReplyClick, onEditReply }: Props) {
+  const [showTooltip, setShowTooltip] = React.useState(true);
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowTooltip(false);
+    }, 5000);
+    return () => clearTimeout(timer);
+  }, []);
+
   const isDark = state.theme === 'dark';
   const bgColor = isDark ? 'bg-black' : 'bg-white';
   const textColor = isDark ? 'text-white' : 'text-black';
@@ -16,10 +26,12 @@ export function InstagramPreview({ state, onThemeToggle }: Props) {
 
   return (
     <div 
-      className={`w-fit max-w-lg sm:max-w-xl ${bgColor} text-left flex flex-col`}
+      className={`max-w-full ${bgColor} text-left flex flex-col`}
       style={{ 
         padding: `${state.padding ?? 16}px`,
-        borderRadius: `${state.borderRadius ?? 12}px` 
+        borderRadius: `${state.borderRadius ?? 12}px`,
+        width: (state.autoWidth ?? true) ? 'fit-content' : `${state.cardWidth ?? 480}px`,
+        maxWidth: `${state.cardWidth ?? 480}px`
       }}
     >
       {state.isPinned && (
@@ -59,9 +71,25 @@ export function InstagramPreview({ state, onThemeToggle }: Props) {
                 {state.likeCount} suka
               </span>
             )}
-            <button className={`text-[12px] ${mutedColor} font-semibold ${isDark ? 'hover:text-white' : 'hover:text-black'}`}>
-              Balas
-            </button>
+            <div className="relative inline-block group/balas">
+              <button 
+                onClick={(e) => { e.stopPropagation(); onReplyClick?.(); }}
+                className={`text-[12px] ${mutedColor} font-semibold ${isDark ? 'hover:text-white' : 'hover:text-black'} cursor-pointer`}
+              >
+                Balas
+              </button>
+              
+              {/* Overlay Tooltip Simpel */}
+              {showTooltip && (
+                <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1.5 flex flex-col items-center pointer-events-none no-export z-30 animate-bounce" style={{ animationDuration: '3s' }} data-html2canvas-ignore="true">
+                  <div className="w-1.5 h-1.5 bg-[#ee2a7b] rotate-45 -mb-0.5"></div>
+                  <div className="bg-gradient-to-tr from-[#f9ce34] via-[#ee2a7b] to-[#6228d7] text-white text-[9px] font-semibold py-0.5 px-2 rounded-full whitespace-nowrap shadow-md flex items-center gap-1">
+                    <span className="w-1 h-1 bg-white rounded-full animate-pulse shrink-0" />
+                    Klik balas untuk tambah balasan
+                  </div>
+                </div>
+              )}
+            </div>
             <button className={`text-[12px] ${mutedColor} font-semibold ${isDark ? 'hover:text-white' : 'hover:text-black'}`}>
               Kirim
             </button>
@@ -83,7 +111,12 @@ export function InstagramPreview({ state, onThemeToggle }: Props) {
           {state.nestedReplies && state.nestedReplies.length > 0 ? (
             <div className="mt-3 space-y-3">
               {state.nestedReplies.map(reply => (
-                <div key={reply.id} className="flex items-start">
+                <div 
+                  key={reply.id} 
+                  onClick={() => onEditReply?.(reply.id)}
+                  className="flex items-start cursor-pointer hover:bg-neutral-500/10 p-2 -m-2 rounded-xl transition-all"
+                  title="Klik untuk edit / hapus balasan ini"
+                >
                   <img src={reply.avatarUrl} alt="Avatar" className={`w-6 h-6 rounded-full object-cover mr-3 shrink-0 ${isDark ? '' : 'border border-gray-100'}`} />
                   <div className="flex-1 min-w-0 pr-4">
                     <p className={`leading-tight break-words whitespace-pre-wrap ${textColor}`} style={{ fontSize: `${state.fontSize || 14}px` }}>
@@ -100,7 +133,12 @@ export function InstagramPreview({ state, onThemeToggle }: Props) {
                     <div className="flex flex-wrap items-center mt-1.5 gap-x-3 gap-y-1">
                       <span className={`text-[11px] ${mutedColor} font-medium`}>{reply.timestamp.replace(' lalu', '')}</span>
                       {reply.likeCount && reply.likeCount !== '0' && <span className={`text-[11px] ${mutedColor} font-medium`}>{reply.likeCount} suka</span>}
-                      <button className={`text-[11px] ${mutedColor} font-semibold`}>Balas</button>
+                      <button 
+                        onClick={(e) => { e.stopPropagation(); onReplyClick?.(reply.id); }}
+                        className={`text-[11px] ${mutedColor} font-semibold cursor-pointer`}
+                      >
+                        Balas
+                      </button>
                     </div>
                   </div>
                   <Heart className={`w-3 h-3 mt-1 shrink-0 ${isDark ? 'text-[#A8A8A8]' : 'text-gray-400'}`} strokeWidth={2} />

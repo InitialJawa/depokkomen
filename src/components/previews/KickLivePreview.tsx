@@ -6,6 +6,8 @@ import { Sword, Star, Hexagon } from 'lucide-react';
 interface Props {
   state: CommentState;
   onThemeToggle?: () => void;
+  onReplyClick?: (commentId?: string) => void;
+  onEditReply?: (commentId: string) => void;
 }
 
 const nameColors = ['#53FC18', '#00DF9E', '#E467FF', '#FF9A00', '#00D6FE', '#FF5B5B', '#FFFF00'];
@@ -28,13 +30,13 @@ const getBadges = (username: string) => {
   return { hasSub, hasMod };
 };
 
-export function KickLivePreview({ state, onThemeToggle }: Props) {
+export function KickLivePreview({ state, onThemeToggle, onReplyClick, onEditReply }: Props) {
   const isDark = state.theme === 'dark';
   const textColor = isDark ? 'text-white' : 'text-black';
   const bgClass = state.hideLiveBackground ? 'bg-transparent' : (isDark ? 'bg-[#0B0E14]' : 'bg-white');
   const borderClass = state.hideLiveBackground ? 'border-transparent' : (isDark ? 'border-[#1E232B]' : 'border-gray-200');
 
-  const containerClasses = `w-full min-w-[320px] max-w-lg text-left flex flex-col ${bgClass} ${
+  const containerClasses = `max-w-full text-left flex flex-col relative cursor-pointer hover:bg-neutral-500/5 transition-all ${bgClass} ${
     !state.hideLiveBackground ? `border ${borderClass} overflow-hidden shadow-lg` : ''
   }`;
 
@@ -43,7 +45,14 @@ export function KickLivePreview({ state, onThemeToggle }: Props) {
     const { hasSub, hasMod } = getBadges(comment.username);
     
     return (
-      <div key={comment.id || 'main'} className={`px-3 py-1.5 flex items-start w-full transition-colors`}>
+      <div 
+        key={comment.id || 'main'} 
+        onClick={() => !isMain && onEditReply?.(comment.id)}
+        className={`px-3 py-1.5 flex items-start w-full transition-colors ${
+          !isMain ? 'cursor-pointer hover:bg-neutral-500/10 rounded-lg' : ''
+        }`}
+        title={!isMain ? "Klik untuk edit / hapus komentar ini" : undefined}
+      >
         <div className="flex-1 min-w-0 leading-relaxed font-semibold flex flex-wrap items-center">
           <div className="inline-flex items-center align-middle mr-1.5 gap-1 shrink-0 mt-0.5">
             {comment.avatarUrl && !comment.avatarUrl.includes('avatars.githubusercontent.com') && (
@@ -82,10 +91,13 @@ export function KickLivePreview({ state, onThemeToggle }: Props) {
 
   return (
     <div 
+      onClick={() => onReplyClick?.()}
       className={containerClasses} 
       style={{ 
         padding: state.hideLiveBackground ? '0' : `${state.padding ?? 16}px`,
-        borderRadius: state.hideLiveBackground ? '0' : `${state.borderRadius ?? 12}px`
+        borderRadius: state.hideLiveBackground ? '0' : `${state.borderRadius ?? 12}px`,
+        width: (state.autoWidth ?? true) ? 'fit-content' : `${state.cardWidth ?? 360}px`,
+        maxWidth: `${state.cardWidth ?? 360}px`
       }}
     >
       {renderComment(state, true)}

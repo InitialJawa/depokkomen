@@ -7,13 +7,14 @@ interface AccordionProps {
   icon?: React.ReactNode;
   children: React.ReactNode;
   defaultOpen?: boolean;
+  className?: string;
 }
 
-export function Accordion({ title, icon, children, defaultOpen = false }: AccordionProps) {
+export function Accordion({ title, icon, children, defaultOpen = false, className = "" }: AccordionProps) {
   const [isOpen, setIsOpen] = useState(defaultOpen);
 
   return (
-    <div className="border-b border-[var(--panel-border)] last:border-b-0">
+    <div className={`border-b border-[var(--panel-border)] last:border-b-0 ${className}`}>
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="w-full flex items-center justify-between py-4 px-5 bg-[var(--panel-bg)] hover:bg-[var(--root-bg)] transition-colors focus:outline-none select-none"

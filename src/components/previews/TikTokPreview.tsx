@@ -6,9 +6,19 @@ import { renderFormattedText } from '../../utils';
 interface Props {
   state: CommentState;
   onThemeToggle?: () => void;
+  onReplyClick?: (replyId?: string) => void;
+  onEditReply?: (replyId: string) => void;
 }
 
-export function TikTokPreview({ state, onThemeToggle }: Props) {
+export function TikTokPreview({ state, onThemeToggle, onReplyClick, onEditReply }: Props) {
+  const [showTooltip, setShowTooltip] = React.useState(true);
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowTooltip(false);
+    }, 5000);
+    return () => clearTimeout(timer);
+  }, []);
+
   const isReply = state.tiktokTemplate === 'reply';
   const isDark = state.theme === 'dark';
   
@@ -24,14 +34,17 @@ export function TikTokPreview({ state, onThemeToggle }: Props) {
   const mutedText = isDark ? 'text-neutral-400' : 'text-gray-500';
 
   if (isReply) {
+    const replyWidth = state.cardWidth ? Math.max(260, state.cardWidth - 30) : 450;
     return (
       <div 
-        className="flex flex-col relative w-fit max-w-lg sm:max-w-xl mt-4 shadow-md"
+        className="flex flex-col relative max-w-full mt-4 shadow-md"
         style={{
           ...bubbleStyle,
           padding: `${state.padding ?? 16}px`,
           borderRadius: `${state.borderRadius ?? 12}px`,
-          borderBottomLeftRadius: '0px'
+          borderBottomLeftRadius: '0px',
+          width: (state.autoWidth ?? true) ? 'fit-content' : `${replyWidth}px`,
+          maxWidth: `${replyWidth}px`
         }}
       >
         {/* Reply Tail */}
@@ -78,11 +91,13 @@ export function TikTokPreview({ state, onThemeToggle }: Props) {
 
   return (
     <div 
-      className="flex flex-col relative w-fit max-w-lg sm:max-w-xl"
+      className="flex flex-col relative max-w-full"
       style={{
         backgroundColor: defaultBg,
         padding: `${state.padding ?? 16}px`,
-        borderRadius: `${state.borderRadius ?? 12}px`
+        borderRadius: `${state.borderRadius ?? 12}px`,
+        width: (state.autoWidth ?? true) ? 'fit-content' : `${state.cardWidth ?? 480}px`,
+        maxWidth: `${state.cardWidth ?? 480}px`
       }}
     >
       {state.isPinned && (
@@ -127,9 +142,25 @@ export function TikTokPreview({ state, onThemeToggle }: Props) {
             <span className={`text-[13px] ${isDark ? 'text-neutral-500' : 'text-gray-500'}`}>
               {state.timestamp}
             </span>
-            <button className={`text-[13px] ${isDark ? 'text-neutral-500 hover:text-neutral-300' : 'text-gray-500 hover:text-gray-700'} font-semibold tracking-wide`}>
-              Balas
-            </button>
+            <div className="relative inline-block group/balas">
+              <button 
+                onClick={(e) => { e.stopPropagation(); onReplyClick?.(); }}
+                className={`text-[13px] ${isDark ? 'text-neutral-500 hover:text-neutral-300' : 'text-gray-500 hover:text-gray-700'} font-semibold tracking-wide cursor-pointer`}
+              >
+                Balas
+              </button>
+              
+              {/* Overlay Tooltip Simpel */}
+              {showTooltip && (
+                <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1.5 flex flex-col items-center pointer-events-none no-export z-30 animate-bounce" style={{ animationDuration: '3s' }} data-html2canvas-ignore="true">
+                  <div className="w-1.5 h-1.5 bg-[#FE2B54] rotate-45 -mb-0.5"></div>
+                  <div className="bg-[#FE2B54] text-white text-[9px] font-semibold py-0.5 px-2 rounded-full whitespace-nowrap shadow-md flex items-center gap-1">
+                    <span className="w-1 h-1 bg-white rounded-full animate-pulse shrink-0" />
+                    Klik balas untuk tambah balasan
+                  </div>
+                </div>
+              )}
+            </div>
             {state.creatorLiked && (
               <div className={`flex items-center text-[12px] font-medium leading-none px-1.5 py-0.5 rounded-sm ${isDark ? 'bg-neutral-800 text-[#FE2B54]' : 'bg-gray-100 text-[#FE2B54]'}`}>
                 Disukai oleh kreator
@@ -151,11 +182,16 @@ export function TikTokPreview({ state, onThemeToggle }: Props) {
       {state.nestedReplies && state.nestedReplies.length > 0 && (
         <div className="flex flex-col mt-4 pl-12 space-y-4">
           {state.nestedReplies.map(reply => (
-            <div key={reply.id} className="relative flex items-start w-fit max-w-lg sm:max-w-xl">
+            <div 
+              key={reply.id} 
+              onClick={() => onEditReply?.(reply.id)}
+              className="relative flex items-start w-fit max-w-lg sm:max-w-xl cursor-pointer group/reply hover:bg-neutral-500/10 p-2 -m-2 rounded-xl transition-all"
+              title="Klik untuk edit / hapus balasan ini"
+            >
               <img src={reply.avatarUrl} alt="Avatar" className="w-6 h-6 border shrink-0 border-neutral-700 rounded-full object-cover mr-3 bg-neutral-800" />
               <div className="flex-1 min-w-0 pr-6">
                 <div className="flex items-center mt-0.5 mb-1">
-                  <span className={`text-[13px] font-bold ${isDark ? 'text-neutral-300' : 'text-gray-900'} mr-1.5 hover:underline cursor-pointer truncate`}>
+                  <span className={`text-[13px] font-bold ${isDark ? 'text-neutral-300' : 'text-gray-900'} mr-1.5 hover:underline truncate`}>
                     {reply.username}
                   </span>
                   {reply.isVerified && (
@@ -176,7 +212,10 @@ export function TikTokPreview({ state, onThemeToggle }: Props) {
                   <span className={`text-[13px] ${isDark ? 'text-neutral-500' : 'text-gray-500'}`}>
                     {reply.timestamp}
                   </span>
-                  <button className={`text-[13px] ${isDark ? 'text-neutral-500 hover:text-neutral-300' : 'text-gray-500 hover:text-gray-700'} font-semibold tracking-wide`}>
+                  <button 
+                    onClick={(e) => { e.stopPropagation(); onReplyClick?.(reply.id); }}
+                    className={`text-[13px] ${isDark ? 'text-neutral-500 hover:text-neutral-300' : 'text-gray-500 hover:text-gray-700'} font-semibold tracking-wide cursor-pointer`}
+                  >
                     Balas
                   </button>
                   {reply.creatorLiked && (

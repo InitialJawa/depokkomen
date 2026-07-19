@@ -17,7 +17,8 @@ import {
   KickColoredIcon 
 } from './icons';
 import { motion, useMotionValue } from 'motion/react';
-import { Sun, Moon } from 'lucide-react';
+import { Sun, Moon, X, Trash2, Shuffle, Check, MessageSquare, Highlighter, EyeOff, Scissors, RotateCcw } from 'lucide-react';
+import { maleUsernames, femaleUsernames, getRandomAvatarUrl } from '../utils';
 
 interface Props {
   state: CommentState;
@@ -25,15 +26,34 @@ interface Props {
   isPremium: boolean;
   onUpgradeClick: () => void;
   incrementExportCount: () => boolean;
+  exportCount: number;
+  onSaveToHistory?: (state: CommentState) => void;
+  editingItemId?: string | null;
+  setEditingItemId?: (id: string | null) => void;
+  isAddingNew?: boolean;
+  setIsAddingNew?: (adding: boolean) => void;
 }
 
-export function PreviewArea({ state, onStateChange, isPremium, onUpgradeClick, incrementExportCount }: Props) {
+export function PreviewArea({ 
+  state, 
+  onStateChange, 
+  isPremium, 
+  onUpgradeClick, 
+  incrementExportCount, 
+  exportCount, 
+  onSaveToHistory,
+  editingItemId: propEditingItemId,
+  setEditingItemId: propSetEditingItemId,
+  isAddingNew: propIsAddingNew,
+  setIsAddingNew: propSetIsAddingNew
+}: Props) {
   const previewRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [isExporting, setIsExporting] = useState(false);
   const [scale, setScale] = useState(1);
   const [showGrid, setShowGrid] = useState(false);
-  const [bgStyle, setBgStyle] = useState<'checkerboard' | 'solid' | 'transparent'>('checkerboard');
+  const [bgStyle, setBgStyle] = useState<'checkerboard' | 'solid' | 'transparent' | 'gradient'>('gradient');
+  const [showHint, setShowHint] = useState(true);
   
   const x = useMotionValue(0);
   const y = useMotionValue(0);
@@ -52,6 +72,11 @@ export function PreviewArea({ state, onStateChange, isPremium, onUpgradeClick, i
     if (!allowed) {
       onUpgradeClick();
       return;
+    }
+
+    // Save current design to history automatically
+    if (onSaveToHistory) {
+      onSaveToHistory(state);
     }
     
     setIsExporting(true);
@@ -90,13 +115,201 @@ export function PreviewArea({ state, onStateChange, isPremium, onUpgradeClick, i
     }
   };
 
+  // Interactive Reply and Comments Modal States
+  const [localEditingItemId, localSetEditingItemId] = useState<string | null>(null);
+  const [localIsAddingNew, localSetIsAddingNew] = useState(false);
+
+  const editingItemId = propEditingItemId !== undefined ? propEditingItemId : localEditingItemId;
+  const setEditingItemId = propSetEditingItemId !== undefined ? propSetEditingItemId : localSetEditingItemId;
+  const isAddingNew = propIsAddingNew !== undefined ? propIsAddingNew : localIsAddingNew;
+  const setIsAddingNew = propSetIsAddingNew !== undefined ? propSetIsAddingNew : localSetIsAddingNew;
+
+  const [modalUsername, setModalUsername] = useState('');
+  const [modalHandle, setModalHandle] = useState('');
+  const [modalText, setModalText] = useState('');
+  const [modalAvatar, setModalAvatar] = useState('');
+  const [modalVerified, setModalVerified] = useState(false);
+  const [modalTimestamp, setModalTimestamp] = useState('');
+  const [modalLikes, setModalLikes] = useState('');
+  const [modalCreatorLiked, setModalCreatorLiked] = useState(false);
+  const [modalPinned, setModalPinned] = useState(false);
+
+  const modalTextareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const applyModalFormat = (tag: string) => {
+    if (!modalTextareaRef.current) return;
+    const start = modalTextareaRef.current.selectionStart;
+    const end = modalTextareaRef.current.selectionEnd;
+    const text = modalText;
+    if (start !== end) {
+      const selectedText = text.substring(start, end);
+      const newText = text.substring(0, start) + `[${tag}]` + selectedText + `[/${tag}]` + text.substring(end);
+      setModalText(newText);
+      
+      setTimeout(() => {
+        modalTextareaRef.current?.focus();
+        modalTextareaRef.current?.setSelectionRange(start, start + tag.length * 2 + 5 + selectedText.length);
+      }, 0);
+    } else {
+      alert('Tandai / blok teks balasan terlebih dahulu!');
+    }
+  };
+
+  const resetModalFormat = () => {
+    const newText = modalText.replace(/\[\/?(highlight|blur|cut)\]/g, '');
+    setModalText(newText);
+  };
+
+  const handleReplyClick = (replyId?: string) => {
+    const isMale = Math.random() > 0.5;
+    const array = isMale ? maleUsernames : femaleUsernames;
+    const newName = array[Math.floor(Math.random() * array.length)];
+    const newHandle = `@${newName.replace(/\s+/g, '').toLowerCase()}${Math.floor(Math.random() * 100)}`;
+    
+    setModalUsername(newName);
+    setModalHandle(newHandle);
+    setModalAvatar(getRandomAvatarUrl(isMale ? 'male' : 'female'));
+    setModalVerified(false);
+    
+    const isLiveMode = state.platform === 'kick_live' || (state.platform === 'instagram' && state.instagramTemplate === 'live');
+    if (isLiveMode) {
+      setModalText('Komentar tambahan...');
+    } else {
+      const replyUser = replyId ? (state.nestedReplies?.find(r => r.id === replyId)?.username || state.username) : state.username;
+      setModalText(`@${replyUser.replace(/\s+/g, '').toLowerCase()} `);
+    }
+    
+    setModalTimestamp('1j lalu');
+    setModalLikes('0');
+    setModalCreatorLiked(false);
+    setModalPinned(false);
+    
+    setIsAddingNew(true);
+    setEditingItemId(null);
+  };
+
+  const handleEditReply = (itemId: string) => {
+    const isLiveMode = state.platform === 'kick_live' || (state.platform === 'instagram' && state.instagramTemplate === 'live');
+    const listKey = isLiveMode ? 'additionalComments' : 'nestedReplies';
+    const items = state[listKey] || [];
+    const item = (items as any[]).find((i: any) => i.id === itemId);
+    if (!item) return;
+
+    setEditingItemId(itemId);
+    setIsAddingNew(false);
+    setModalUsername(item.username || '');
+    setModalHandle(item.handle || '');
+    setModalAvatar(item.avatarUrl || '');
+    setModalVerified(item.isVerified || false);
+    setModalText(item.commentText || '');
+    setModalTimestamp(item.timestamp || '1j lalu');
+    setModalLikes(item.likeCount || '0');
+    setModalCreatorLiked(item.creatorLiked || false);
+    setModalPinned(item.isPinned || false);
+  };
+
+  const handleSaveModal = () => {
+    const isLiveMode = state.platform === 'kick_live' || (state.platform === 'instagram' && state.instagramTemplate === 'live');
+    const listKey = isLiveMode ? 'additionalComments' : 'nestedReplies';
+    const items = [...(state[listKey] || [])];
+
+    if (isAddingNew) {
+      const id = Math.random().toString(36).substring(7);
+      const newItem = isLiveMode ? {
+        id,
+        username: modalUsername,
+        avatarUrl: modalAvatar,
+        isVerified: modalVerified,
+        commentText: modalText,
+        handle: modalHandle,
+        timestamp: modalTimestamp,
+        likeCount: modalLikes,
+        creatorLiked: modalCreatorLiked,
+        isPinned: modalPinned,
+      } : {
+        id,
+        username: modalUsername,
+        handle: modalHandle,
+        avatarUrl: modalAvatar,
+        isVerified: modalVerified,
+        commentText: modalText,
+        timestamp: modalTimestamp,
+        likeCount: modalLikes,
+        creatorLiked: modalCreatorLiked,
+        isPinned: modalPinned,
+      };
+      onStateChange({ [listKey]: [...items, newItem] });
+    } else if (editingItemId) {
+      const updated = items.map((item: any) => {
+        if (item.id === editingItemId) {
+          return isLiveMode ? {
+            ...item,
+            username: modalUsername,
+            avatarUrl: modalAvatar,
+            isVerified: modalVerified,
+            commentText: modalText,
+            handle: modalHandle,
+            timestamp: modalTimestamp,
+            likeCount: modalLikes,
+            creatorLiked: modalCreatorLiked,
+            isPinned: modalPinned,
+          } : {
+            ...item,
+            username: modalUsername,
+            handle: modalHandle,
+            avatarUrl: modalAvatar,
+            isVerified: modalVerified,
+            commentText: modalText,
+            timestamp: modalTimestamp,
+            likeCount: modalLikes,
+            creatorLiked: modalCreatorLiked,
+            isPinned: modalPinned,
+          };
+        }
+        return item;
+      });
+      onStateChange({ [listKey]: updated });
+    }
+
+    // Reset states
+    setIsAddingNew(false);
+    setEditingItemId(null);
+  };
+
+  const handleDeleteModal = () => {
+    if (!editingItemId) return;
+    const isLiveMode = state.platform === 'kick_live' || (state.platform === 'instagram' && state.instagramTemplate === 'live');
+    const listKey = isLiveMode ? 'additionalComments' : 'nestedReplies';
+    const items = state[listKey] || [];
+    const filtered = items.filter((item: any) => item.id !== editingItemId);
+    onStateChange({ [listKey]: filtered });
+    setIsAddingNew(false);
+    setEditingItemId(null);
+  };
+
+  const handleRandomizeProfile = () => {
+    const isMale = Math.random() > 0.5;
+    const array = isMale ? maleUsernames : femaleUsernames;
+    const name = array[Math.floor(Math.random() * array.length)];
+    const handle = `@${name.replace(/\s+/g, '').toLowerCase()}${Math.floor(Math.random() * 100)}`;
+    setModalUsername(name);
+    setModalHandle(handle);
+    setModalAvatar(getRandomAvatarUrl(isMale ? 'male' : 'female'));
+  };
+
   const getPreviewComponent = () => {
+    const props = {
+      state,
+      onReplyClick: handleReplyClick,
+      onEditReply: handleEditReply
+    };
+
     switch (state.platform) {
-      case 'tiktok': return <TikTokPreview state={state} />;
-      case 'instagram': return state.instagramTemplate === 'live' ? <IGLivePreview state={state} /> : <InstagramPreview state={state} />;
-      case 'youtube': return <YouTubePreview state={state} />;
-      case 'twitter': return <TwitterPreview state={state} />;
-      case 'kick_live': return <KickLivePreview state={state} />;
+      case 'tiktok': return <TikTokPreview {...props} />;
+      case 'instagram': return state.instagramTemplate === 'live' ? <IGLivePreview {...props} /> : <InstagramPreview {...props} />;
+      case 'youtube': return <YouTubePreview {...props} />;
+      case 'twitter': return <TwitterPreview {...props} />;
+      case 'kick_live': return <KickLivePreview {...props} />;
       default: return null;
     }
   };
@@ -151,7 +364,13 @@ export function PreviewArea({ state, onStateChange, isPremium, onUpgradeClick, i
         onCardThemeChange={(theme) => onStateChange({ theme })}
       />
 
-      <ExportCard onExport={handleExport} isExporting={isExporting} />
+      <ExportCard 
+        onExport={handleExport} 
+        isExporting={isExporting} 
+        isPremium={isPremium}
+        exportCount={exportCount}
+        onUpgradeClick={onUpgradeClick}
+      />
 
       {/* Floating Platform Dock (Centered at the top to prevent any collision) */}
       <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 flex bg-[var(--panel-bg)]/85 backdrop-blur-md border border-[var(--panel-border)] rounded-xl p-1 shadow-lg items-center gap-1">
@@ -180,7 +399,17 @@ export function PreviewArea({ state, onStateChange, isPremium, onUpgradeClick, i
       {/* Canvas Container */}
       <div 
         ref={containerRef}
-        className={`flex-1 relative overflow-hidden flex items-center justify-center cursor-grab active:cursor-grabbing ${bgStyle === 'checkerboard' ? 'bg-checkerboard' : bgStyle === 'solid' ? 'bg-[var(--root-bg)]' : 'bg-transparent'}`}
+        className={`flex-1 relative overflow-hidden flex items-center justify-center cursor-grab active:cursor-grabbing transition-all duration-300 ${
+          bgStyle === 'checkerboard' 
+            ? 'bg-checkerboard' 
+            : bgStyle === 'solid' 
+              ? 'bg-[var(--root-bg)]' 
+              : bgStyle === 'gradient'
+                ? (state.theme === 'dark' 
+                    ? 'bg-gradient-to-tr from-[#020617] via-[#0f172a] to-[#1e1b4b]' 
+                    : 'bg-gradient-to-tr from-[#e0e7ff] via-[#fae8ff] to-[#fce7f3]')
+                : 'bg-transparent'
+        }`}
       >
         {/* Figma like checkerboard via CSS class or inline style */}
         {bgStyle === 'checkerboard' && (
@@ -212,6 +441,253 @@ export function PreviewArea({ state, onStateChange, isPremium, onUpgradeClick, i
              {getPreviewComponent()}
           </div>
         </motion.div>
+
+        {/* Beautiful Floating Inline Editor Modal for Nest Replies / Live Comments */}
+        {(isAddingNew || editingItemId) && (
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="w-full max-w-md bg-zinc-900/95 border border-zinc-800 text-white rounded-2xl shadow-2xl overflow-hidden backdrop-blur-xl"
+            >
+              {/* Header */}
+              <div className="flex items-center justify-between p-4.5 border-b border-zinc-800 bg-zinc-950/45">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-lg bg-pink-500/10 flex items-center justify-center text-pink-400">
+                    <MessageSquare className="w-4 h-4" />
+                  </div>
+                  <h3 className="font-semibold text-sm">
+                    {isAddingNew ? 'Tambah Balasan Baru' : 'Edit Balasan / Komentar'}
+                  </h3>
+                </div>
+                <button 
+                  onClick={() => { setIsAddingNew(false); setEditingItemId(null); }}
+                  className="p-1 hover:bg-zinc-800 rounded-md transition text-zinc-400 hover:text-white cursor-pointer"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              {/* Body */}
+              <div className="p-5 flex flex-col gap-4 max-h-[70vh] overflow-y-auto custom-scrollbar">
+                {/* Randomize profile button */}
+                <button
+                  type="button"
+                  onClick={handleRandomizeProfile}
+                  className="flex items-center justify-center gap-2 py-2 px-4 rounded-xl border border-zinc-800 hover:border-zinc-700 bg-zinc-800/35 hover:bg-zinc-800/80 text-xs font-semibold text-blue-400 transition-all cursor-pointer self-start"
+                >
+                  <Shuffle className="w-3.5 h-3.5" />
+                  Acak Profil Pembalas
+                </button>
+
+                {/* Profile row */}
+                <div className="grid grid-cols-2 gap-3.5">
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-[11px] font-bold uppercase tracking-wider text-zinc-400">Username</label>
+                    <input 
+                      type="text" 
+                      value={modalUsername} 
+                      onChange={(e) => setModalUsername(e.target.value)}
+                      placeholder="username"
+                      className="w-full text-xs py-2 px-3 rounded-lg bg-zinc-950 border border-zinc-800 focus:border-zinc-600 outline-none transition text-white"
+                    />
+                  </div>
+                  {!(state.platform === 'kick_live' || (state.platform === 'instagram' && state.instagramTemplate === 'live')) && (
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-[11px] font-bold uppercase tracking-wider text-zinc-400">Handle / Tag</label>
+                      <input 
+                        type="text" 
+                        value={modalHandle} 
+                        onChange={(e) => setModalHandle(e.target.value)}
+                        placeholder="@handle"
+                        className="w-full text-xs py-2 px-3 rounded-lg bg-zinc-950 border border-zinc-800 focus:border-zinc-600 outline-none transition text-white"
+                      />
+                    </div>
+                  )}
+                </div>
+
+                {/* Avatar URL input */}
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[11px] font-bold uppercase tracking-wider text-zinc-400">Avatar URL</label>
+                  <div className="flex gap-2 items-center">
+                    {modalAvatar && (
+                      <img src={modalAvatar} alt="preview" className="w-8 h-8 rounded-full border border-zinc-800 object-cover bg-zinc-950 shrink-0" />
+                    )}
+                    <input 
+                      type="text" 
+                      value={modalAvatar} 
+                      onChange={(e) => setModalAvatar(e.target.value)}
+                      placeholder="https://..."
+                      className="w-full text-xs py-2 px-3 rounded-lg bg-zinc-950 border border-zinc-800 focus:border-zinc-600 outline-none transition text-white"
+                    />
+                  </div>
+                </div>
+
+                {/* Comment Textarea with emoji selection and styling toolbar */}
+                <div className="flex flex-col gap-1.5">
+                  <div className="flex justify-between items-center mb-0.5">
+                    <label className="text-[11px] font-bold uppercase tracking-wider text-zinc-400">Isi Balasan / Komentar</label>
+                    <div className="flex gap-1 bg-zinc-950 p-0.5 rounded border border-zinc-800/80">
+                      {['👍', '❤️', '😂', '🔥', '😭'].map(emoji => (
+                        <button 
+                          key={emoji}
+                          type="button"
+                          onClick={() => setModalText(modalText + emoji)}
+                          className="text-xs hover:bg-zinc-800 w-5.5 h-5.5 rounded flex items-center justify-center transition cursor-pointer"
+                        >
+                          {emoji}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <textarea 
+                    ref={modalTextareaRef}
+                    value={modalText} 
+                    onChange={(e) => setModalText(e.target.value)}
+                    placeholder="Tulis balasan Anda di sini..."
+                    rows={3}
+                    className="w-full text-xs py-2 px-3 rounded-lg bg-zinc-950 border border-zinc-800 focus:border-zinc-600 outline-none transition text-white resize-none"
+                    autoFocus
+                  />
+                  
+                  {/* Advanced Formatting Toolbar inside modal */}
+                  <div className="flex items-center justify-between bg-zinc-950 border border-zinc-800 rounded-lg p-1">
+                    <div className="flex gap-1">
+                      <button 
+                        title="Highlight" 
+                        type="button" 
+                        onMouseDown={(e) => { e.preventDefault(); applyModalFormat('highlight'); }} 
+                        className="w-8 h-8 rounded-md hover:bg-zinc-800 flex items-center justify-center text-zinc-400 hover:text-yellow-500 transition cursor-pointer"
+                      >
+                        <Highlighter className="w-4 h-4" />
+                      </button>
+                      <button 
+                        title="Blur" 
+                        type="button" 
+                        onMouseDown={(e) => { e.preventDefault(); applyModalFormat('blur'); }} 
+                        className="w-8 h-8 rounded-md hover:bg-zinc-800 flex items-center justify-center text-zinc-400 hover:text-blue-500 transition cursor-pointer"
+                      >
+                        <EyeOff className="w-4 h-4" />
+                      </button>
+                      <button 
+                        title="Cut" 
+                        type="button" 
+                        onMouseDown={(e) => { e.preventDefault(); applyModalFormat('cut'); }} 
+                        className="w-8 h-8 rounded-md hover:bg-zinc-800 flex items-center justify-center text-zinc-400 hover:text-red-500 transition cursor-pointer"
+                      >
+                        <Scissors className="w-4 h-4" />
+                      </button>
+                    </div>
+                    <div className="w-[1px] h-4 bg-zinc-800 mx-1" />
+                    <button 
+                      title="Reset Formatting" 
+                      type="button" 
+                      onClick={resetModalFormat} 
+                      className="w-8 h-8 rounded-md hover:bg-zinc-800 flex items-center justify-center text-zinc-400 hover:text-white transition cursor-pointer"
+                    >
+                      <RotateCcw className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Optional items for normal comment templates only */}
+                {!(state.platform === 'kick_live' || (state.platform === 'instagram' && state.instagramTemplate === 'live')) && (
+                  <div className="grid grid-cols-2 gap-3.5">
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-[11px] font-bold uppercase tracking-wider text-zinc-400">Waktu / Timestamp</label>
+                      <input 
+                        type="text" 
+                        value={modalTimestamp} 
+                        onChange={(e) => setModalTimestamp(e.target.value)}
+                        placeholder="1j lalu"
+                        className="w-full text-xs py-2 px-3 rounded-lg bg-zinc-950 border border-zinc-800 focus:border-zinc-600 outline-none transition text-white"
+                      />
+                    </div>
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-[11px] font-bold uppercase tracking-wider text-zinc-400">Jumlah Likes</label>
+                      <input 
+                        type="text" 
+                        value={modalLikes} 
+                        onChange={(e) => setModalLikes(e.target.value)}
+                        placeholder="2.4K"
+                        className="w-full text-xs py-2 px-3 rounded-lg bg-zinc-950 border border-zinc-800 focus:border-zinc-600 outline-none transition text-white"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* Switches / Checkboxes */}
+                <div className="flex flex-wrap gap-4 bg-zinc-950/50 p-3 rounded-xl border border-zinc-800/80">
+                  <label className="flex items-center gap-2 cursor-pointer select-none text-xs text-zinc-300 hover:text-white">
+                    <input 
+                      type="checkbox" 
+                      checked={modalVerified} 
+                      onChange={(e) => setModalVerified(e.target.checked)}
+                      className="rounded border-zinc-800 bg-zinc-950 text-blue-500 focus:ring-0 cursor-pointer"
+                    />
+                    <span>Verified Badge</span>
+                  </label>
+
+                  {!(state.platform === 'kick_live' || (state.platform === 'instagram' && state.instagramTemplate === 'live')) && (
+                    <label className="flex items-center gap-2 cursor-pointer select-none text-xs text-zinc-300 hover:text-white">
+                      <input 
+                        type="checkbox" 
+                        checked={modalCreatorLiked} 
+                        onChange={(e) => setModalCreatorLiked(e.target.checked)}
+                        className="rounded border-zinc-800 bg-zinc-950 text-blue-500 focus:ring-0 cursor-pointer"
+                      />
+                      <span>Disukai Kreator</span>
+                    </label>
+                  )}
+
+                  <label className="flex items-center gap-2 cursor-pointer select-none text-xs text-zinc-300 hover:text-white">
+                    <input 
+                      type="checkbox" 
+                      checked={modalPinned} 
+                      onChange={(e) => setModalPinned(e.target.checked)}
+                      className="rounded border-zinc-800 bg-zinc-950 text-blue-500 focus:ring-0 cursor-pointer"
+                    />
+                    <span>Pinned Comment</span>
+                  </label>
+                </div>
+              </div>
+
+              {/* Footer */}
+              <div className="flex items-center justify-between p-4 border-t border-zinc-800 bg-zinc-950/45 gap-3">
+                <div>
+                  {!isAddingNew && (
+                    <button
+                      type="button"
+                      onClick={handleDeleteModal}
+                      className="flex items-center gap-1.5 text-xs font-bold text-red-500 hover:text-red-400 py-2 px-3 rounded-lg hover:bg-red-500/10 cursor-pointer transition"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                      Hapus
+                    </button>
+                  )}
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => { setIsAddingNew(false); setEditingItemId(null); }}
+                    className="text-xs font-semibold py-2 px-4 rounded-lg hover:bg-zinc-800/80 text-zinc-400 hover:text-white cursor-pointer transition border border-zinc-800"
+                  >
+                    Batal
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleSaveModal}
+                    className="flex items-center gap-1.5 text-xs font-bold py-2 px-5 rounded-lg bg-pink-600 hover:bg-pink-500 text-white cursor-pointer transition shadow-lg shadow-pink-600/15"
+                  >
+                    <Check className="w-3.5 h-3.5" />
+                    Simpan
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
       </div>
 
       {/* Canvas Status Bar */}
@@ -221,7 +697,7 @@ export function PreviewArea({ state, onStateChange, isPremium, onUpgradeClick, i
           <span className="opacity-30">|</span>
           <button 
             onClick={() => {
-              const styles: ('checkerboard' | 'solid' | 'transparent')[] = ['checkerboard', 'solid', 'transparent'];
+              const styles: ('checkerboard' | 'solid' | 'transparent' | 'gradient')[] = ['gradient', 'checkerboard', 'solid', 'transparent'];
               const nextIndex = (styles.indexOf(bgStyle) + 1) % styles.length;
               setBgStyle(styles[nextIndex]);
             }}

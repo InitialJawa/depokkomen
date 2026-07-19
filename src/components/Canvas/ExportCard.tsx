@@ -6,9 +6,12 @@ import { motion, AnimatePresence } from 'motion/react';
 interface Props {
   onExport: (scale: number, format: 'png' | 'jpg' | 'webp' | 'transparent') => Promise<void>;
   isExporting: boolean;
+  isPremium: boolean;
+  exportCount: number;
+  onUpgradeClick: () => void;
 }
 
-export function ExportCard({ onExport, isExporting }: Props) {
+export function ExportCard({ onExport, isExporting, isPremium, exportCount, onUpgradeClick }: Props) {
   const [isOpen, setIsOpen] = useState(false);
   const [scale, setScale] = useState(2);
   const [format, setFormat] = useState<'png' | 'jpg' | 'webp' | 'transparent'>('png');
@@ -83,6 +86,38 @@ export function ExportCard({ onExport, isExporting }: Props) {
                 <Download className="w-4 h-4" /> Export Asset
               </div>
             </Button>
+
+            {/* Daily Export Limit Progress Info */}
+            <div className="pt-3 border-t border-[var(--panel-border)]/60 mt-1 select-none">
+              <div className="flex justify-between items-center text-[10px] font-bold text-[var(--text-muted)] mb-1.5">
+                <span>BATAS EKSPOR HARIAN</span>
+                <span>{isPremium ? 'PRO (Tanpa Batas)' : `${exportCount} / 30`}</span>
+              </div>
+              {!isPremium ? (
+                <div className="space-y-2">
+                  <div className="h-1.5 w-full bg-[var(--root-bg)] rounded-full overflow-hidden border border-[var(--panel-border)]/50">
+                    <div 
+                      className="h-full rounded-full transition-all duration-500 bg-blue-500"
+                      style={{ width: `${Math.min(100, (exportCount / 30) * 100)}%` }}
+                    />
+                  </div>
+                  <button 
+                    onClick={() => {
+                      setIsOpen(false);
+                      onUpgradeClick();
+                    }}
+                    className="text-[10px] text-blue-400 hover:text-blue-300 font-bold transition-colors w-full text-center block hover:underline cursor-pointer"
+                  >
+                    Dapatkan Ekspor Tanpa Batas (PRO) →
+                  </button>
+                </div>
+              ) : (
+                <div className="text-[10px] text-emerald-400 font-semibold flex items-center gap-1 justify-center py-0.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                  Keanggotaan PRO Anda Aktif
+                </div>
+              )}
+            </div>
           </motion.div>
         )}
       </AnimatePresence>

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Check, Sparkles, Shield, Zap, CreditCard, Flame, Video, Award, RefreshCw } from 'lucide-react';
+import { X, Check, Sparkles, Shield, Zap, CreditCard, Flame, Video, Award, RefreshCw, Crown } from 'lucide-react';
 import { Button } from './ui';
 
 interface Props {
@@ -35,7 +35,7 @@ export function UpgradeModal({ isOpen, onClose, onUpgradeSuccess, isPremium, onD
     { title: 'Resolusi Ultra HD (4x)', desc: 'Hasil tangkapan layar super tajam hingga 4x untuk layar retina.', icon: <Award className="w-4 h-4 text-yellow-500 shrink-0" /> },
     { title: 'Video Animasi (Segera Hadir)', desc: 'Akses eksklusif untuk ekspor format video MP4/WebM dengan animasi IN dan OUT.', icon: <Video className="w-4 h-4 text-pink-500 shrink-0" /> },
     { title: 'Bebas Watermark & Iklan', desc: 'Screenshot murni, bersih, profesional untuk konten komersial.', icon: <Shield className="w-4 h-4 text-emerald-500 shrink-0" /> },
-    { title: 'Prioritas Fitur Baru', desc: 'Request layout platform khusus langsung ditangani prioritas.', icon: <Sparkles className="w-4 h-4 text-blue-500 shrink-0" /> },
+    { title: 'Prioritas Fitur Baru', desc: 'Request layout platform khusus langsung ditangani prioritas.', icon: <Crown className="w-4 h-4 text-blue-500 shrink-0" /> },
   ];
 
   if (!isOpen) return null;
@@ -75,8 +75,8 @@ export function UpgradeModal({ isOpen, onClose, onUpgradeSuccess, isPremium, onD
               {/* Header */}
               <div className="text-center">
                 <div className="inline-flex items-center gap-1.5 bg-gradient-to-r from-blue-500/15 to-indigo-500/15 text-blue-400 text-xs font-bold px-3 py-1 rounded-full border border-blue-500/10 mb-3 uppercase tracking-wider">
-                  <Sparkles className="w-3.5 h-3.5" />
-                  depokkomen pro creator
+                  <Crown className="w-3.5 h-3.5" />
+                  SocialCanvas PRO Creator
                 </div>
                 <h3 className="text-2xl font-extrabold tracking-tight">Kembangkan Kontenmu Tanpa Batas</h3>
                 <p className="text-xs text-[var(--text-muted)] mt-1.5">
@@ -150,7 +150,7 @@ export function UpgradeModal({ isOpen, onClose, onUpgradeSuccess, isPremium, onD
                 </div>
                 <h3 className="text-xl font-bold">Simulasi Pembayaran (Jalur Siap)</h3>
                 <p className="text-xs text-[var(--text-muted)] mt-1.5">
-                  Ini adalah simulasi gerbang pembayaran premium depokkomen.
+                  Ini adalah simulasi gerbang pembayaran premium SocialCanvas.
                 </p>
               </div>
 

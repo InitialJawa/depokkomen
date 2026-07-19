@@ -69,6 +69,37 @@ export function SectionAppearance({ state, onChange }: Props) {
         />
       </div>
 
+      <div>
+        <div className="flex justify-between items-center mb-2">
+          <Label className="mb-0">Lebar Kartu (Width)</Label>
+          <span className="text-xs font-mono bg-[var(--root-bg)] border border-[var(--panel-border)] px-2 py-0.5 rounded text-[var(--text-muted)]">
+            {(state.autoWidth ?? true) ? 'Otomatis' : `${state.cardWidth ?? 480}px`}
+          </span>
+        </div>
+        
+        <div className="flex items-center gap-2 mb-2.5">
+          <label className="flex items-center gap-2 cursor-pointer group">
+            <input 
+              type="checkbox" 
+              checked={state.autoWidth ?? true}
+              onChange={e => onChange({ autoWidth: e.target.checked })}
+              className="w-4 h-4 rounded border-[var(--panel-border)] text-blue-600 focus:ring-blue-600 bg-[var(--root-bg)] cursor-pointer"
+            />
+            <span className="text-xs font-semibold text-[var(--root-fg)] group-hover:text-blue-500 transition-colors">Lebar Otomatis (Auto Adjust)</span>
+          </label>
+        </div>
+
+        {!(state.autoWidth ?? true) && (
+          <input 
+            type="range" 
+            min="280" max="650" step="10"
+            value={state.cardWidth ?? 480}
+            onChange={e => onChange({ cardWidth: parseInt(e.target.value) })}
+            className="w-full accent-blue-500"
+          />
+        )}
+      </div>
+
       <div className="flex items-center gap-2 mt-2">
         <label className="flex items-center gap-2 cursor-pointer group">
           <input 

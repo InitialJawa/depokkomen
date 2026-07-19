@@ -6,15 +6,17 @@ import { Moon, Sun } from 'lucide-react';
 interface Props {
   state: CommentState;
   onThemeToggle?: () => void;
+  onReplyClick?: (commentId?: string) => void;
+  onEditReply?: (commentId: string) => void;
 }
 
-export function IGLivePreview({ state, onThemeToggle }: Props) {
+export function IGLivePreview({ state, onThemeToggle, onReplyClick, onEditReply }: Props) {
   const isDark = state.theme === 'dark';
   const bgColor = state.hideLiveBackground ? 'bg-transparent' : (isDark ? 'bg-black' : 'bg-white');
   const textColor = isDark ? 'text-white' : 'text-black';
   const containerClasses = state.hideLiveBackground 
-    ? "flex items-start max-w-sm w-fit drop-shadow-md" 
-    : `flex items-start ${bgColor} backdrop-blur-md max-w-sm w-fit shadow-sm`;
+    ? "flex items-start w-full drop-shadow-md" 
+    : `flex items-start ${bgColor} backdrop-blur-md w-full shadow-sm`;
 
   const containerStyle = {
     padding: state.hideLiveBackground ? '0' : `${state.padding ?? 10}px`,
@@ -22,7 +24,14 @@ export function IGLivePreview({ state, onThemeToggle }: Props) {
   };
 
   return (
-    <div className="w-fit max-w-lg sm:max-w-xl flex justify-start text-left relative pt-10 pb-4 flex-col gap-1">
+    <div 
+      onClick={() => onReplyClick?.()}
+      className="max-w-full flex justify-start text-left relative pt-10 pb-4 flex-col gap-1 cursor-pointer hover:bg-neutral-500/5 rounded-2xl transition-all"
+      style={{ 
+        width: (state.autoWidth ?? true) ? 'fit-content' : `${state.cardWidth ?? 360}px`,
+        maxWidth: `${state.cardWidth ?? 360}px`
+      }}
+    >
       {/* Container for main live comment styling */}
       <div className={containerClasses} style={containerStyle}>
         {state.avatarUrl && (
@@ -49,7 +58,12 @@ export function IGLivePreview({ state, onThemeToggle }: Props) {
       
       {/* Additional stacked comments */}
       {(state.additionalComments || []).map((comment) => (
-        <div key={comment.id} className={containerClasses}>
+        <div 
+          key={comment.id} 
+          onClick={() => onEditReply?.(comment.id)}
+          className={`${containerClasses} cursor-pointer hover:bg-neutral-500/10 p-2 -m-2 rounded-xl transition-all`}
+          title="Klik untuk edit / hapus komentar ini"
+        >
           {comment.avatarUrl && (
             <img src={comment.avatarUrl} alt="Avatar" className={`w-[34px] h-[34px] rounded-full object-cover mr-3 bg-gray-800 shrink-0 ${state.hideLiveBackground ? '' : (isDark ? 'border border-white/10' : 'border border-gray-200')}`} />
           )}

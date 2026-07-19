@@ -6,8 +6,13 @@ export interface AdditionalComment {
   id: string;
   avatarUrl: string;
   username: string;
+  handle?: string;
   isVerified: boolean;
   commentText: string;
+  timestamp?: string;
+  likeCount?: string;
+  creatorLiked?: boolean;
+  isPinned?: boolean;
 }
 
 export interface NestedReply {
@@ -20,6 +25,7 @@ export interface NestedReply {
   timestamp: string;
   likeCount: string;
   creatorLiked: boolean;
+  isPinned?: boolean;
 }
 
 export interface CommentState {
@@ -48,6 +54,8 @@ export interface CommentState {
   hasDropShadow: boolean;
   padding: number;
   borderRadius: number;
+  cardWidth?: number;
+  autoWidth?: boolean;
 }
 
 export const defaultState: CommentState = {
@@ -76,4 +84,23 @@ export const defaultState: CommentState = {
   hasDropShadow: true,
   padding: 16,
   borderRadius: 12,
+  cardWidth: 480,
+  autoWidth: true,
 };
+
+export interface DraftItem {
+  id: string;
+  name: string;
+  platform: Platform;
+  state: CommentState;
+  createdAt: string;
+  isCloudSynced?: boolean;
+}
+
+export interface HistoryItem {
+  id: string;
+  platform: Platform;
+  state: CommentState;
+  createdAt: string;
+}
+

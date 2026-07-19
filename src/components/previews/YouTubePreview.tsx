@@ -6,9 +6,19 @@ import { renderFormattedText } from '../../utils';
 interface Props {
   state: CommentState;
   onThemeToggle?: () => void;
+  onReplyClick?: (replyId?: string) => void;
+  onEditReply?: (replyId: string) => void;
 }
 
-export function YouTubePreview({ state, onThemeToggle }: Props) {
+export function YouTubePreview({ state, onThemeToggle, onReplyClick, onEditReply }: Props) {
+  const [showTooltip, setShowTooltip] = React.useState(true);
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowTooltip(false);
+    }, 5000);
+    return () => clearTimeout(timer);
+  }, []);
+
   const isDark = state.theme === 'dark';
   
   const bgColor = isDark ? 'bg-[#0F0F0F]' : 'bg-white';
@@ -19,10 +29,12 @@ export function YouTubePreview({ state, onThemeToggle }: Props) {
 
   return (
     <div 
-      className={`w-fit max-w-lg sm:max-w-xl ${bgColor} text-left flex flex-col`}
+      className={`max-w-full ${bgColor} text-left flex flex-col`}
       style={{ 
         padding: `${state.padding ?? 16}px`,
-        borderRadius: `${state.borderRadius ?? 12}px`
+        borderRadius: `${state.borderRadius ?? 12}px`,
+        width: (state.autoWidth ?? true) ? 'fit-content' : `${state.cardWidth ?? 520}px`,
+        maxWidth: `${state.cardWidth ?? 520}px`
       }}
     >
       {state.isPinned && (
@@ -75,9 +87,25 @@ export function YouTubePreview({ state, onThemeToggle }: Props) {
               <ThumbsDown className={`w-[18px] h-[18px] ${textColor}`} strokeWidth={1.5} />
             </div>
             {/* Reply */}
-            <span className={`text-[12px] font-medium ${textColor} ml-2 ${btnHover} px-3 py-1.5 rounded-full cursor-pointer`}>
-              Balas
-            </span>
+            <div className="relative inline-block group/balas ml-2">
+              <span 
+                onClick={(e) => { e.stopPropagation(); onReplyClick?.(); }}
+                className={`text-[12px] font-medium ${textColor} ${btnHover} px-3 py-1.5 rounded-full cursor-pointer inline-block`}
+              >
+                Balas
+              </span>
+              
+              {/* Overlay Tooltip Simpel */}
+              {showTooltip && (
+                <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1.5 flex flex-col items-center pointer-events-none no-export z-30 animate-bounce" style={{ animationDuration: '3s' }} data-html2canvas-ignore="true">
+                  <div className="w-1.5 h-1.5 bg-[#FF0000] rotate-45 -mb-0.5"></div>
+                  <div className="bg-[#FF0000] text-white text-[9px] font-semibold py-0.5 px-2 rounded-full whitespace-nowrap shadow-md flex items-center gap-1">
+                    <span className="w-1 h-1 bg-white rounded-full animate-pulse shrink-0" />
+                    Klik balas untuk tambah balasan
+                  </div>
+                </div>
+              )}
+            </div>
             {/* Creator Liked */}
             {state.creatorLiked && (
               <div className="flex items-center ml-2 cursor-pointer relative">
@@ -95,7 +123,12 @@ export function YouTubePreview({ state, onThemeToggle }: Props) {
           {state.nestedReplies && state.nestedReplies.length > 0 ? (
             <div className="mt-4 space-y-4">
               {state.nestedReplies.map(reply => (
-                <div key={reply.id} className="flex items-start">
+                <div 
+                  key={reply.id} 
+                  onClick={() => onEditReply?.(reply.id)}
+                  className="flex items-start cursor-pointer hover:bg-neutral-500/10 p-2 -m-2 rounded-xl transition-all"
+                  title="Klik untuk edit / hapus balasan ini"
+                >
                   <img src={reply.avatarUrl} alt="Avatar" className={`w-[24px] h-[24px] rounded-full object-cover mr-3 bg-gray-200 shrink-0 ${isDark ? 'border border-gray-800' : ''}`} />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center mb-0.5">
@@ -120,7 +153,12 @@ export function YouTubePreview({ state, onThemeToggle }: Props) {
                       <div className="flex items-center cursor-pointer p-1 px-2">
                         <ThumbsDown className={`w-[14px] h-[14px] ${textColor}`} strokeWidth={1.5} />
                       </div>
-                      <span className={`text-[11px] font-medium ${textColor} ml-1 ${btnHover} px-2 py-1.5 rounded-full cursor-pointer`}>Balas</span>
+                      <span 
+                        onClick={(e) => { e.stopPropagation(); onReplyClick?.(reply.id); }}
+                        className={`text-[11px] font-medium ${textColor} ml-1 ${btnHover} px-2 py-1.5 rounded-full cursor-pointer`}
+                      >
+                        Balas
+                      </span>
                       {reply.creatorLiked && (
                         <div className="flex items-center ml-2 cursor-pointer relative">
                           <img src={reply.avatarUrl} alt="Creator" className="w-4 h-4 rounded-full" />

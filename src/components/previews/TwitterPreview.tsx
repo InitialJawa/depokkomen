@@ -6,9 +6,19 @@ import { renderFormattedText } from '../../utils';
 interface Props {
   state: CommentState;
   onThemeToggle?: () => void;
+  onReplyClick?: (replyId?: string) => void;
+  onEditReply?: (replyId: string) => void;
 }
 
-export function TwitterPreview({ state, onThemeToggle }: Props) {
+export function TwitterPreview({ state, onThemeToggle, onReplyClick, onEditReply }: Props) {
+  const [showTooltip, setShowTooltip] = React.useState(true);
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowTooltip(false);
+    }, 5000);
+    return () => clearTimeout(timer);
+  }, []);
+
   const isDark = state.theme === 'dark';
   
   const bgColor = isDark ? 'bg-black' : 'bg-white';
@@ -19,10 +29,12 @@ export function TwitterPreview({ state, onThemeToggle }: Props) {
 
   return (
     <div 
-      className={`w-fit max-w-lg sm:max-w-xl ${bgColor} text-left ${nameColor} border ${borderColor} flex flex-col`}
+      className={`max-w-full ${bgColor} text-left ${nameColor} border ${borderColor} flex flex-col`}
       style={{ 
         padding: `${state.padding ?? 16}px`,
-        borderRadius: `${state.borderRadius ?? 12}px`
+        borderRadius: `${state.borderRadius ?? 12}px`,
+        width: (state.autoWidth ?? true) ? 'fit-content' : `${state.cardWidth ?? 520}px`,
+        maxWidth: `${state.cardWidth ?? 520}px`
       }}
     >
       {state.isPinned && (
@@ -68,11 +80,27 @@ export function TwitterPreview({ state, onThemeToggle }: Props) {
           
           {/* Action Bar */}
           <div className={`flex items-center justify-between ${mutedColor} max-w-md`}>
-            <div className="flex items-center group cursor-pointer">
-              <div className="p-2 -mx-2 rounded-full group-hover:bg-[#1D9BF0]/10 group-hover:text-[#1D9BF0] transition">
-                <MessageCircle className="w-[18px] h-[18px]" strokeWidth={2} />
+            <div className="relative inline-block group/balas">
+              <div 
+                onClick={(e) => { e.stopPropagation(); onReplyClick?.(); }}
+                className="flex items-center group cursor-pointer"
+              >
+                <div className="p-2 -mx-2 rounded-full group-hover:bg-[#1D9BF0]/10 group-hover:text-[#1D9BF0] transition">
+                  <MessageCircle className="w-[18px] h-[18px]" strokeWidth={2} />
+                </div>
+                <span className="text-[13px] ml-1 group-hover:text-[#1D9BF0]">{state.replyCount}</span>
               </div>
-              <span className="text-[13px] ml-1 group-hover:text-[#1D9BF0]">{state.replyCount}</span>
+              
+              {/* Overlay Tooltip Simpel */}
+              {showTooltip && (
+                <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1.5 flex flex-col items-center pointer-events-none no-export z-30 animate-bounce" style={{ animationDuration: '3s' }} data-html2canvas-ignore="true">
+                  <div className="w-1.5 h-1.5 bg-[#1D9BF0] rotate-45 -mb-0.5"></div>
+                  <div className="bg-[#1D9BF0] text-white text-[9px] font-semibold py-0.5 px-2 rounded-full whitespace-nowrap shadow-md flex items-center gap-1">
+                    <span className="w-1 h-1 bg-white rounded-full animate-pulse shrink-0" />
+                    Klik balas untuk tambah balasan
+                  </div>
+                </div>
+              )}
             </div>
             
             <div className="flex items-center group cursor-pointer">
@@ -107,13 +135,18 @@ export function TwitterPreview({ state, onThemeToggle }: Props) {
           {state.nestedReplies && state.nestedReplies.length > 0 && (
             <div className="mt-2 pt-2 border-t border-transparent space-y-4">
               {state.nestedReplies.map((reply, i) => (
-                <div key={reply.id} className="flex flex-col relative mt-2">
-                  <div className="absolute top-0 bottom-0 left-[-22px] w-0.5 bg-gray-300 dark:bg-gray-700"></div>
+                <div 
+                  key={reply.id} 
+                  onClick={() => onEditReply?.(reply.id)}
+                  className="flex flex-col relative mt-2 cursor-pointer hover:bg-neutral-500/10 p-2 -m-2 rounded-xl transition-all"
+                  title="Klik untuk edit / hapus balasan ini"
+                >
+                  <div className="absolute top-0 bottom-0 left-[-14px] w-0.5 bg-gray-300 dark:bg-gray-700"></div>
                   <div className="flex items-start">
                     <img src={reply.avatarUrl} alt="Avatar" className="w-10 h-10 rounded-full object-cover mr-3 bg-neutral-800 shrink-0" />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center text-[15px] mb-0.5">
-                        <span className={`font-bold ${nameColor} mr-1 truncate hover:underline cursor-pointer`}>
+                        <span className={`font-bold ${nameColor} mr-1 truncate hover:underline`}>
                           {reply.username}
                         </span>
                         {reply.isVerified && (
@@ -123,13 +156,18 @@ export function TwitterPreview({ state, onThemeToggle }: Props) {
                         )}
                         <span className={`${mutedColor} truncate`}>{reply.handle}</span>
                         <span className={`${mutedColor} mx-1`}>·</span>
-                        <span className={`${mutedColor} hover:underline cursor-pointer shrink-0`}>{reply.timestamp.replace(' lalu', '')}</span>
+                        <span className={`${mutedColor} hover:underline shrink-0`}>{reply.timestamp.replace(' lalu', '')}</span>
                       </div>
                       <div className={`leading-normal break-words whitespace-pre-wrap mb-3 ${textColor}`} style={{ fontSize: `${state.fontSize || 15}px` }}>
                         {renderFormattedText(reply.commentText)}
                       </div>
                       <div className={`flex items-center justify-between ${mutedColor} max-w-sm`}>
-                        <div className="flex items-center group cursor-pointer"><MessageCircle className="w-4 h-4" strokeWidth={2} /></div>
+                        <div 
+                          onClick={(e) => { e.stopPropagation(); onReplyClick?.(reply.id); }}
+                          className="flex items-center group cursor-pointer p-1 rounded hover:bg-neutral-500/15"
+                        >
+                          <MessageCircle className="w-4 h-4" strokeWidth={2} />
+                        </div>
                         <div className="flex items-center group cursor-pointer"><Repeat2 className="w-4 h-4" strokeWidth={2} /></div>
                         <div className="flex items-center group cursor-pointer">
                           <Heart className="w-4 h-4" strokeWidth={2} /><span className="text-[13px] ml-1">{reply.likeCount !== '0' ? reply.likeCount : ''}</span>
