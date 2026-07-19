@@ -26,7 +26,7 @@ export function Header({ platform, theme, onPlatformChange, onThemeChange }: Pro
            <div className="w-4 h-4 border-2 border-white rounded-[4px]"></div>
         </div>
         <div>
-           <h1 className="text-xl font-semibold tracking-tight text-[var(--root-fg)] hidden sm:block">depokkomen</h1>
+           <h1 className="text-xl font-semibold tracking-tight text-[var(--root-fg)] hidden sm:block">SocialCanvas</h1>
         </div>
       </div>
       
