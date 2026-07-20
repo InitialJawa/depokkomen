@@ -2,6 +2,7 @@ import React from 'react';
 import { CommentState } from '../../types';
 import { Label, Select } from '../ui';
 import { Sun, Moon } from 'lucide-react';
+import { useLanguage } from '../../contexts/LanguageContext';
 
 interface Props {
   state: CommentState;
@@ -9,10 +10,12 @@ interface Props {
 }
 
 export function SectionAppearance({ state, onChange }: Props) {
+  const { language, t } = useLanguage();
+
   return (
     <div className="flex flex-col gap-5">
       <div>
-        <Label>Font Family</Label>
+        <Label>{t('appearance.fontFamily')}</Label>
         <Select 
           value={state.fontFamily || 'san-francisco'}
           onChange={(e) => onChange({ fontFamily: e.target.value as any })}
@@ -29,7 +32,7 @@ export function SectionAppearance({ state, onChange }: Props) {
 
       <div className="flex flex-col gap-3">
         <div className="flex items-center gap-3">
-          <Label className="mb-0 w-24 text-[10px]">Font Size</Label>
+          <Label className="mb-0 w-24 text-[10px]">{t('appearance.fontSize')}</Label>
           <input 
             type="range" 
             min="12" max="24" step="1"
@@ -41,7 +44,7 @@ export function SectionAppearance({ state, onChange }: Props) {
         </div>
 
         <div className="flex items-center gap-3">
-          <Label className="mb-0 w-24 text-[10px]">Padding</Label>
+          <Label className="mb-0 w-24 text-[10px]">{t('appearance.padding')}</Label>
           <input 
             type="range" 
             min="8" max="32" step="1"
@@ -53,7 +56,7 @@ export function SectionAppearance({ state, onChange }: Props) {
         </div>
 
         <div className="flex items-center gap-3">
-          <Label className="mb-0 w-24 text-[10px]">Border Radius</Label>
+          <Label className="mb-0 w-24 text-[10px]">{t('appearance.borderRadius')}</Label>
           <input 
             type="range" 
             min="0" max="48" step="1"
@@ -67,9 +70,9 @@ export function SectionAppearance({ state, onChange }: Props) {
 
       <div>
         <div className="flex justify-between items-center mb-2">
-          <Label className="mb-0">Lebar Kartu (Width)</Label>
+          <Label className="mb-0">{t('appearance.cardWidth')}</Label>
           <span className="text-xs font-mono bg-[var(--root-bg)] border border-[var(--panel-border)] px-2 py-0.5 rounded text-[var(--text-muted)]">
-            {(state.autoWidth ?? true) ? 'Otomatis' : `${state.cardWidth ?? 480}px`}
+            {(state.autoWidth ?? true) ? (language === 'id' ? 'Otomatis' : 'Auto') : `${state.cardWidth ?? 480}px`}
           </span>
         </div>
         
@@ -81,7 +84,7 @@ export function SectionAppearance({ state, onChange }: Props) {
               onChange={e => onChange({ autoWidth: e.target.checked })}
               className="w-4 h-4 rounded border-[var(--panel-border)] text-blue-600 focus:ring-blue-600 bg-[var(--root-bg)] cursor-pointer"
             />
-            <span className="text-xs font-semibold text-[var(--root-fg)] group-hover:text-blue-500 transition-colors">Lebar Otomatis (Auto Adjust)</span>
+            <span className="text-xs font-semibold text-[var(--root-fg)] group-hover:text-blue-500 transition-colors">{t('appearance.autoWidth')}</span>
           </label>
         </div>
 
@@ -104,13 +107,13 @@ export function SectionAppearance({ state, onChange }: Props) {
             onChange={e => onChange({ hasDropShadow: e.target.checked })}
             className="w-4 h-4 rounded border-[var(--panel-border)] text-blue-600 focus:ring-blue-600 bg-[var(--root-bg)] cursor-pointer"
           />
-          <span className="text-xs font-medium text-[var(--root-fg)] group-hover:text-blue-500 transition-colors">Drop Shadow</span>
+          <span className="text-xs font-medium text-[var(--root-fg)] group-hover:text-blue-500 transition-colors">{t('appearance.dropShadow')}</span>
         </label>
       </div>
 
       {state.platform === 'tiktok' && state.tiktokTemplate === 'reply' && (
         <div className="pt-2 border-t border-[var(--panel-border)]">
-          <Label>Reply Bubble Color</Label>
+          <Label>{t('appearance.replyBubbleColor')}</Label>
           <div className="flex items-center gap-3">
             <div className="relative w-8 h-8 rounded-full overflow-hidden border border-[var(--panel-border)] shrink-0">
               <input 
@@ -142,7 +145,7 @@ export function SectionAppearance({ state, onChange }: Props) {
                 onChange={e => onChange({ hideLiveBackground: e.target.checked })}
                 className="w-4 h-4 rounded border-[var(--panel-border)] text-blue-600 focus:ring-blue-600 bg-[var(--root-bg)] cursor-pointer"
               />
-              <span className="text-xs font-medium text-[var(--root-fg)] group-hover:text-blue-500 transition-colors">Transparent Background</span>
+              <span className="text-xs font-medium text-[var(--root-fg)] group-hover:text-blue-500 transition-colors">{t('appearance.transparentBackground')}</span>
             </label>
          </div>
       )}

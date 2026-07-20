@@ -14,6 +14,7 @@ import {
   Zap, 
   RefreshCw 
 } from 'lucide-react';
+import { useLanguage } from '../../contexts/LanguageContext';
 
 interface Props {
   state: CommentState;
@@ -40,6 +41,7 @@ export function SectionDrafts({
   onRenameDraft,
   onClearHistory
 }: Props) {
+  const { language, t } = useLanguage();
   const [activeTab, setActiveTab] = useState<'drafts' | 'history'>('drafts');
   const [newDraftName, setNewDraftName] = useState('');
   const [editingDraftId, setEditingDraftId] = useState<string | null>(null);
@@ -75,7 +77,7 @@ export function SectionDrafts({
     setGlobalSyncing(true);
     setTimeout(() => {
       setGlobalSyncing(false);
-      triggerStatus('Sinkronisasi cloud berhasil!');
+      triggerStatus(t('drafts.syncSuccess'));
     }, 1500);
   };
 
@@ -93,12 +95,12 @@ export function SectionDrafts({
     
     // Create draft
     onSaveDraft(name, state);
-    triggerStatus(`Draf "${name}" disimpan lokal!`);
+    triggerStatus(t('drafts.draftSavedLocal', { name }));
 
     // Simulate Cloud sync
     if (isPremium) {
       simulateSync('global', () => {
-        triggerStatus(`Draf "${name}" tersinkronisasi ke cloud!`);
+        triggerStatus(t('drafts.draftSavedCloud', { name }));
       });
     }
   };
@@ -112,31 +114,31 @@ export function SectionDrafts({
     if (!editingName.trim()) return;
     onRenameDraft(id, editingName.trim());
     setEditingDraftId(null);
-    triggerStatus('Draf berhasil diganti nama!');
+    triggerStatus(t('drafts.draftRenamed'));
 
     if (isPremium) {
       simulateSync(id, () => {
-        triggerStatus('Nama draf diperbarui di cloud!');
+        triggerStatus(language === 'id' ? 'Nama draf diperbarui di cloud!' : 'Draft name updated in the cloud!');
       });
     }
   };
 
   const handleDelete = (id: string, name: string) => {
     onDeleteDraft(id);
-    triggerStatus(`Draf "${name}" berhasil dihapus.`);
+    triggerStatus(t('drafts.draftDeleted', { name }));
   };
 
   const handleLoadDraft = (draft: DraftItem | HistoryItem, label: string) => {
     onLoadState(draft.state);
-    triggerStatus(`Memuat "${label}"...`);
+    triggerStatus(t('drafts.loading', { name: label }));
   };
 
   const formatTime = (isoString: string) => {
     try {
       const date = new Date(isoString);
-      return date.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + ' - ' + date.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
+      return date.toLocaleTimeString(language === 'id' ? 'id-ID' : 'en-US', { hour: '2-digit', minute: '2-digit' }) + ' - ' + date.toLocaleDateString(language === 'id' ? 'id-ID' : 'en-US', { day: 'numeric', month: 'short' });
     } catch (e) {
-      return 'Baru saja';
+      return language === 'id' ? 'Baru saja' : 'Just now';
     }
   };
 
@@ -161,15 +163,15 @@ export function SectionDrafts({
           )}
           <div>
             <div className="font-extrabold flex items-center gap-1">
-              {isPremium ? 'Cloud Sync Aktif' : 'Penyimpanan Lokal'}
+              {isPremium ? t('drafts.cloudSyncActive') : t('drafts.cloudSyncInactive')}
               {isPremium && (
                 <span className="text-[9px] bg-blue-500 text-white font-black uppercase px-1 py-0.2 rounded scale-95 origin-left">PRO</span>
               )}
             </div>
             <p className="text-[10px] text-[var(--text-muted)] leading-normal">
               {isPremium 
-                ? (globalSyncing ? 'Menyinkronkan dengan server...' : 'Karya disinkronkan otomatis antar perangkat')
-                : 'Draf disimpan di browser. Upgrade untuk cloud sync.'
+                ? (globalSyncing ? (language === 'id' ? 'Menyinkronkan dengan server...' : 'Syncing with server...') : t('drafts.cloudSyncDescActive'))
+                : t('drafts.cloudSyncDescInactive')
               }
             </p>
           </div>
@@ -180,7 +182,7 @@ export function SectionDrafts({
             disabled={globalSyncing}
             onClick={triggerGlobalSync}
             className="w-7 h-7 bg-[var(--panel-bg)] hover:bg-[var(--button-hover)] border border-[var(--panel-border)] rounded-lg flex items-center justify-center cursor-pointer transition-all active:scale-95 text-[var(--root-fg)]"
-            title="Sinkronisasi Manual"
+            title={t('drafts.manualSync')}
           >
             <RefreshCw className={`w-3 h-3 ${globalSyncing ? 'animate-spin text-blue-500' : ''}`} />
           </button>
@@ -190,7 +192,7 @@ export function SectionDrafts({
             className="px-2.5 py-1 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-black text-[9px] uppercase tracking-wider rounded-lg flex items-center gap-1 shadow-sm transition-all active:scale-95 cursor-pointer shrink-0"
           >
             <Zap className="w-2.5 h-2.5 fill-white" />
-            PRO Sync
+            {t('drafts.proSync')}
           </button>
         )}
       </div>
@@ -214,7 +216,7 @@ export function SectionDrafts({
           }`}
         >
           <FolderOpen className="w-3.5 h-3.5" />
-          <span>Draf ({drafts.length})</span>
+          <span>{t('sidebar.draft.count', { count: drafts.length })}</span>
         </button>
         <button
           onClick={() => setActiveTab('history')}
@@ -225,7 +227,7 @@ export function SectionDrafts({
           }`}
         >
           <Clock className="w-3.5 h-3.5" />
-          <span>Riwayat ({history.length})</span>
+          <span>{t('sidebar.history.count', { count: history.length })}</span>
         </button>
       </div>
 
@@ -238,7 +240,7 @@ export function SectionDrafts({
               type="text"
               value={newDraftName}
               onChange={(e) => setNewDraftName(e.target.value)}
-              placeholder="Beri nama draf baru..."
+              placeholder={t('drafts.placeholder')}
               className="flex-1 px-3 py-2 bg-[var(--root-bg)] border border-[var(--panel-border)] rounded-xl focus:outline-none focus:ring-1 focus:ring-blue-500 text-xs text-[var(--root-fg)] placeholder:text-[var(--text-muted)]"
               maxLength={40}
             />
@@ -246,7 +248,7 @@ export function SectionDrafts({
               type="submit"
               disabled={!newDraftName.trim()}
               className="w-9 h-9 shrink-0 bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-blue-700 text-white rounded-xl flex items-center justify-center font-bold cursor-pointer transition-colors"
-              title="Simpan Draf"
+              title={language === 'id' ? "Simpan Draf" : "Save Draft"}
             >
               <Plus className="w-4 h-4" />
             </button>
@@ -257,8 +259,8 @@ export function SectionDrafts({
             {drafts.length === 0 ? (
               <div className="py-8 text-center text-[var(--text-muted)] flex flex-col items-center justify-center gap-1.5 border border-dashed border-[var(--panel-border)] rounded-xl">
                 <FolderOpen className="w-6 h-6 opacity-30" />
-                <p className="font-semibold">Belum ada draf disimpan</p>
-                <p className="text-[10px] opacity-80">Gunakan input di atas untuk menyimpan draf pertama Anda.</p>
+                <p className="font-semibold">{t('drafts.emptyDrafts')}</p>
+                <p className="text-[10px] opacity-80">{t('drafts.emptyDraftsDesc')}</p>
               </div>
             ) : (
               drafts.map((d) => (
@@ -300,7 +302,7 @@ export function SectionDrafts({
                               ) : (
                                 <Cloud className="w-2.5 h-2.5 fill-blue-400/5" />
                               )}
-                              <span className="text-[9px]">{syncingId === d.id ? 'Menyinkronkan...' : 'Cloud'}</span>
+                              <span className="text-[9px]">{syncingId === d.id ? (language === 'id' ? 'Menyinkronkan...' : 'Syncing...') : 'Cloud'}</span>
                             </span>
                           )}
                         </div>
@@ -314,14 +316,14 @@ export function SectionDrafts({
                       <button
                         onClick={() => handleStartRename(d.id, d.name)}
                         className="w-6 h-6 rounded-lg hover:bg-[var(--button-hover)] border border-[var(--panel-border)]/50 flex items-center justify-center text-[var(--text-muted)] hover:text-blue-400 cursor-pointer"
-                        title="Ganti Nama"
+                        title={t('drafts.rename')}
                       >
                         <Edit2 className="w-3 h-3" />
                       </button>
                       <button
                         onClick={() => handleDelete(d.id, d.name)}
                         className="w-6 h-6 rounded-lg hover:bg-red-500/10 border border-red-500/10 hover:border-red-500/20 flex items-center justify-center text-red-500 cursor-pointer"
-                        title="Hapus"
+                        title={t('drafts.delete')}
                       >
                         <Trash2 className="w-3 h-3" />
                       </button>
@@ -337,12 +339,12 @@ export function SectionDrafts({
         <div className="space-y-3">
           {history.length > 0 && (
             <div className="flex justify-between items-center bg-[var(--root-bg)]/30 p-1.5 rounded-xl border border-[var(--panel-border)]/50">
-              <span className="text-[10px] text-[var(--text-muted)] font-semibold pl-1.5">Disimpan otomatis dari suntingan terakhir</span>
+              <span className="text-[10px] text-[var(--text-muted)] font-semibold pl-1.5">{t('drafts.autoSaveDesc')}</span>
               <button
                 onClick={onClearHistory}
                 className="px-2.5 py-1 text-[10px] font-bold text-red-400 hover:text-red-300 hover:bg-red-500/5 rounded-lg border border-red-500/10 cursor-pointer transition-all"
               >
-                Bersihkan Semua
+                {t('drafts.clearAll')}
               </button>
             </div>
           )}
@@ -352,16 +354,19 @@ export function SectionDrafts({
             {history.length === 0 ? (
               <div className="py-8 text-center text-[var(--text-muted)] flex flex-col items-center justify-center gap-1.5 border border-dashed border-[var(--panel-border)] rounded-xl">
                 <Clock className="w-6 h-6 opacity-30 animate-pulse" />
-                <p className="font-semibold">Riwayat masih kosong</p>
+                <p className="font-semibold">{t('drafts.emptyHistory')}</p>
                 <p className="text-[10px] opacity-80 leading-normal max-w-[200px] mx-auto">
-                  Riwayat akan tersimpan otomatis saat Anda menekan tombol **Randomize**, **Reset**, atau mengunduh hasil ekspor.
+                  {language === 'id' 
+                    ? 'Riwayat akan tersimpan otomatis saat Anda menekan tombol **Randomize**, **Reset**, atau mengunduh hasil ekspor.' 
+                    : 'History will be saved automatically when you click the **Randomize**, **Reset**, or download exports buttons.'
+                  }
                 </p>
               </div>
             ) : (
               history.map((h) => (
                 <div 
                   key={h.id} 
-                  onClick={() => handleLoadDraft(h, `Riwayat ${formatTime(h.createdAt)}`)}
+                  onClick={() => handleLoadDraft(h, `${language === 'id' ? 'Riwayat' : 'History'} ${formatTime(h.createdAt)}`)}
                   className="p-2.5 rounded-xl border border-[var(--panel-border)] bg-[var(--root-bg)]/40 hover:bg-[var(--root-bg)]/80 hover:border-indigo-500/20 cursor-pointer transition-all flex flex-col gap-1 text-left relative overflow-hidden group select-none"
                 >
                   <div className="flex items-center justify-between gap-1.5">
@@ -373,7 +378,7 @@ export function SectionDrafts({
                     </span>
                   </div>
                   <p className="text-[10px] text-[var(--text-muted)] truncate max-w-full italic">
-                    "{h.state.commentText || 'Tanpa teks komentar'}"
+                    "{h.state.commentText || (language === 'id' ? 'Tanpa teks komentar' : 'No comment text')}"
                   </p>
                 </div>
               ))

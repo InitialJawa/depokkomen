@@ -8,6 +8,7 @@ import { getRandomState } from './utils';
 import { UpgradeModal } from './components/UpgradeModal';
 import { LandingPage } from './components/LandingPage';
 import { AuthModal } from './components/AuthModal';
+import { useLanguage } from './contexts/LanguageContext';
 import { 
   TikTokColoredIcon, 
   InstagramColoredIcon, 
@@ -39,6 +40,7 @@ export interface UserProfile {
 }
 
 export default function App() {
+  const { language, t } = useLanguage();
   const [state, setState] = useState(defaultState);
   const [appTheme, setAppTheme] = useState<'light' | 'dark'>('dark');
   const [view, setView] = useState<'landing' | 'editor'>('landing');
@@ -140,7 +142,7 @@ export default function App() {
   const handleSaveDraft = (name: string, stateToSave: typeof defaultState) => {
     const newDraft: DraftItem = {
       id: Math.random().toString(36).substring(2, 9),
-      name: name.trim() || `Draf ${new Date().toLocaleDateString('id-ID')}`,
+      name: name.trim() || `${language === 'id' ? 'Draf' : 'Draft'} ${new Date().toLocaleDateString(language === 'id' ? 'id-ID' : 'en-US')}`,
       platform: stateToSave.platform,
       state: { ...stateToSave },
       createdAt: new Date().toISOString(),
@@ -476,14 +478,15 @@ export default function App() {
                  onRandomize={handleRandomize}
                />
 
-               {/* Mobile Drag Handle */}
-               <div 
-                  className="md:hidden absolute bottom-0 left-0 right-0 h-6 flex items-center justify-center cursor-ns-resize bg-gradient-to-t from-[var(--root-bg)] to-transparent z-[100]"
-                  onMouseDown={handleTouchStart}
-                  onTouchStart={handleTouchStart}
-               >
-                 <div className="w-12 h-1.5 bg-white/30 backdrop-blur shadow-sm rounded-full pointer-events-none" />
-               </div>
+            </div>
+
+            {/* Mobile Drag Handle - Sibling in Flex flow to avoid overlapping the status bar */}
+            <div 
+               className="order-1 md:hidden h-4 flex items-center justify-center cursor-ns-resize bg-[var(--panel-bg)]/80 backdrop-blur-sm border-t border-b border-[var(--panel-border)]/60 shrink-0 z-30 animate-pulse"
+               onMouseDown={handleTouchStart}
+               onTouchStart={handleTouchStart}
+            >
+               <div className="w-12 h-1 bg-[var(--text-muted)] opacity-40 rounded-full pointer-events-none" />
             </div>
 
             {/* Properties Panel - Order 2 (Bottom) on Mobile, Order 1 (Left) on PC */}
@@ -518,7 +521,9 @@ export default function App() {
         {/* Footer */}
         <footer className="h-10 flex items-center justify-between shrink-0 px-6 w-full mt-auto text-[11px] text-[var(--text-muted)] border-t border-[var(--sidebar-border)] bg-[var(--panel-bg-translucent)] backdrop-blur-md">
           <p className="font-semibold tracking-wide hidden sm:block opacity-80">
-            Hanya untuk keperluan konten kreatif & edukasi. Jangan digunakan untuk menyebarkan misinformasi.
+            {language === 'id' 
+              ? 'Hanya untuk keperluan konten kreatif & edukasi. Jangan digunakan untuk menyebarkan misinformasi.' 
+              : 'For creative & educational content purposes only. Do not use to spread misinformation.'}
           </p>
           <div className="flex items-center gap-4 text-center sm:text-right w-full sm:w-auto justify-center font-bold">
             <span className="text-blue-500 dark:text-[var(--accent)] tracking-tight">Built for Indonesia UGC</span>

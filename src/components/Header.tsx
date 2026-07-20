@@ -1,8 +1,9 @@
 import React from 'react';
 import { Platform } from '../types';
 import { TikTokColoredIcon, InstagramColoredIcon, YouTubeColoredIcon, TwitterColoredIcon, KickColoredIcon } from './icons';
-import { Moon, Sun, Home, User, Sparkles } from 'lucide-react';
+import { Moon, Sun, Home, User, Sparkles, Globe } from 'lucide-react';
 import { CapybaraLogo } from './CapybaraLogo';
+import { useLanguage } from '../contexts/LanguageContext';
 
 interface UserProfile {
   name: string;
@@ -34,6 +35,7 @@ export function Header({
   isPremium,
   onUpgradeClick
 }: Props) {
+  const { language, setLanguage, t } = useLanguage();
   const platforms: { id: Platform; label: string; icon: React.ReactNode }[] = [
     { id: 'tiktok', label: 'TikTok', icon: <TikTokColoredIcon className="w-5 h-5" /> },
     { id: 'instagram', label: 'Instagram', icon: <InstagramColoredIcon className="w-6 h-6" /> },
@@ -48,7 +50,7 @@ export function Header({
         <div 
           onClick={onGoHome}
           className="flex items-center gap-2.5 cursor-pointer group select-none hover:opacity-90 active:scale-95 transition-all"
-          title="Kembali ke Beranda"
+          title={t('header.goHome')}
         >
           <CapybaraLogo className="w-9 h-9 drop-shadow-sm shrink-0 hover:rotate-6 transition-transform duration-300" />
           <h1 
@@ -68,7 +70,17 @@ export function Header({
           className="flex items-center gap-1 text-xs font-bold text-[var(--text-muted)] hover:text-[var(--root-fg)] transition-colors px-2.5 py-1.5 rounded-lg hover:bg-[var(--button-hover)] cursor-pointer"
         >
           <Home className="w-3.5 h-3.5" />
-          <span className="hidden md:inline">Beranda</span>
+          <span className="hidden md:inline">{t('header.home')}</span>
+        </button>
+
+        {/* Language Switcher */}
+        <button
+          onClick={() => setLanguage(language === 'id' ? 'en' : 'id')}
+          className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-[var(--root-bg)] border border-[var(--panel-border)] text-xs font-bold hover:bg-[var(--button-hover)] text-[var(--root-fg)] transition-all cursor-pointer"
+          title={language === 'id' ? 'Switch to English' : 'Ganti ke Bahasa Indonesia'}
+        >
+          <Globe className="w-3.5 h-3.5 text-[var(--text-muted)]" />
+          <span className="tracking-wide">{language === 'id' ? 'ID' : 'EN'}</span>
         </button>
 
         {/* User Account Button */}
@@ -76,7 +88,7 @@ export function Header({
           <button
             onClick={onLoginClick}
             className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl bg-[var(--root-bg)] border border-[var(--panel-border)] text-xs font-bold hover:bg-[var(--button-hover)] text-[var(--root-fg)] transition-all cursor-pointer"
-            title={`${currentUser.name} (${isPremium ? 'Akun PRO' : 'Akun Free'})`}
+            title={`${currentUser.name} (${isPremium ? t('header.proAccount') : t('header.freeAccount')})`}
           >
             <div className={`p-[1.5px] rounded-full flex items-center justify-center shrink-0 ${
               isPremium 
@@ -93,14 +105,14 @@ export function Header({
             className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-[var(--root-bg)] border border-[var(--panel-border)] text-xs font-bold hover:bg-[var(--button-hover)] text-[var(--root-fg)] transition-all cursor-pointer"
           >
             <User className="w-3.5 h-3.5" />
-            <span>Masuk</span>
+            <span>{t('header.login')}</span>
           </button>
         )}
 
         <button
           onClick={onThemeChange}
           className="flex items-center justify-center w-9 h-9 rounded-full bg-[var(--root-bg)] text-[var(--root-fg)] hover:bg-[var(--button-hover)] transition-colors cursor-pointer"
-          title={`Switch Theme`}
+          title={t('header.switchTheme')}
         >
           {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
         </button>
@@ -108,3 +120,4 @@ export function Header({
     </header>
   );
 }
+

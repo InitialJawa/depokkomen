@@ -11,13 +11,27 @@ interface Props {
 }
 
 export function InstagramPreview({ state, onThemeToggle, onReplyClick, onEditReply }: Props) {
-  const [showTooltip, setShowTooltip] = React.useState(true);
+  const [showTooltip, setShowTooltip] = React.useState(() => {
+    try {
+      return !localStorage.getItem('sc_reply_tooltip_shown');
+    } catch (e) {
+      return true;
+    }
+  });
+
   React.useEffect(() => {
-    const timer = setTimeout(() => {
-      setShowTooltip(false);
-    }, 5000);
-    return () => clearTimeout(timer);
-  }, []);
+    if (showTooltip) {
+      const timer = setTimeout(() => {
+        setShowTooltip(false);
+        try {
+          localStorage.setItem('sc_reply_tooltip_shown', 'true');
+        } catch (e) {
+          // ignore
+        }
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [showTooltip]);
 
   const isDark = state.theme === 'dark';
   const bgColor = isDark ? 'bg-black' : 'bg-white';

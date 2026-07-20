@@ -16,10 +16,12 @@ import {
   Heart,
   HelpCircle,
   MessageCircle,
-  ArrowUpRight
+  ArrowUpRight,
+  Globe
 } from 'lucide-react';
 import { TikTokColoredIcon, InstagramColoredIcon, YouTubeColoredIcon, TwitterColoredIcon, KickColoredIcon } from './icons';
 import { CapybaraLogo } from './CapybaraLogo';
+import { useLanguage } from '../contexts/LanguageContext';
 
 interface Props {
   onStartEditor: (platform?: any) => void;
@@ -42,32 +44,42 @@ export function LandingPage({
   onNavigate,
   theme
 }: Props) {
+  const { language, setLanguage, t } = useLanguage();
+
   const stats = [
-    { value: '10K+', label: 'Konten UGC Dibuat' },
-    { value: '24/7', label: 'Siap Digunakan' },
-    { value: '100%', label: 'Hasil Sangat Realistis' },
-    { value: 'Rp 0', label: 'Bisa Mulai Gratis' },
+    { value: '10K+', label: t('landing.stats.ugc') },
+    { value: '24/7', label: t('landing.stats.ready') },
+    { value: '100%', label: t('landing.stats.realistic') },
+    { value: 'Rp 0', label: t('landing.stats.free') },
   ];
 
   const features = [
     {
-      title: '5 Platform Terpopuler',
-      desc: 'Satu-satunya generator screenshot komentar terlengkap di Indonesia untuk TikTok, Instagram, Twitter/X, YouTube, dan Kick Live Stream.',
+      title: language === 'id' ? '5 Platform Terpopuler' : '5 Most Popular Platforms',
+      desc: language === 'id' 
+        ? 'Satu-satunya generator screenshot komentar terlengkap di Indonesia untuk TikTok, Instagram, Twitter/X, YouTube, dan Kick Live Stream.'
+        : 'The only comprehensive comment screenshot generator in Indonesia supporting TikTok, Instagram, Twitter/X, YouTube, and Kick Live Stream.',
       icon: <Monitor className="w-5 h-5 text-blue-400" />
     },
     {
-      title: 'Kustomisasi Tanpa Batas',
-      desc: 'Atur foto profil, nama pengguna, lencana verifikasi biru, jumlah suka, teks komentar, durasi waktu, hingga warna gelembung balasan komentar.',
+      title: language === 'id' ? 'Kustomisasi Tanpa Batas' : 'Unlimited Customization',
+      desc: language === 'id'
+        ? 'Atur foto profil, nama pengguna, lencana verifikasi biru, jumlah suka, teks komentar, durasi waktu, hingga warna gelembung balasan komentar.'
+        : 'Set profile picture, username, blue verified badge, number of likes, comment text, time duration, and reply bubble color.',
       icon: <Sliders className="w-5 h-5 text-pink-400" />
     },
     {
-      title: 'Kualitas Retina Ultra HD',
-      desc: 'Unduh hasil gambar dengan penskalaan resolusi super tajam (sampai 4x) untuk menjamin screenshot tidak pecah di layar HP manapun.',
+      title: language === 'id' ? 'Kualitas Retina Ultra HD' : 'Retina Ultra HD Quality',
+      desc: language === 'id'
+        ? 'Unduh hasil gambar dengan penskalaan resolusi super tajam (sampai 4x) untuk menjamin screenshot tidak pecah di layar HP manapun.'
+        : 'Download image results with super sharp resolution scaling (up to 4x) to guarantee screenshots do not break on any phone screen.',
       icon: <Award className="w-5 h-5 text-yellow-400" />
     },
     {
-      title: 'Ekspor Transparan & Indah',
-      desc: 'Mendukung ekspor langsung format PNG dengan latar belakang transparan (no-background) yang mempermudah editing langsung di video CapCut / Premiere.',
+      title: language === 'id' ? 'Ekspor Transparan & Indah' : 'Beautiful & Transparent Export',
+      desc: language === 'id'
+        ? 'Mendukung ekspor langsung format PNG dengan latar belakang transparan (no-background) yang mempermudah editing langsung di video CapCut / Premiere.'
+        : 'Supports direct PNG export with a transparent background (no-background) which facilitates editing directly in CapCut / Premiere video editing apps.',
       icon: <ImageIcon className="w-5 h-5 text-emerald-400" />
     }
   ];
@@ -80,46 +92,106 @@ export function LandingPage({
     { name: 'Kick Live', icon: <KickColoredIcon className="w-6 h-6" fontSize="16px" />, path: '/kick-generator' },
   ];
 
-  const pathData: Record<string, { title: string; subtitle: string; badge: string; focusPlatform?: string }> = {
+  const pathData: Record<string, { title: Record<'id' | 'en', string>; subtitle: Record<'id' | 'en', string>; badge: Record<'id' | 'en', string>; focusPlatform?: string }> = {
     '/': {
-      title: 'Buat Screenshot Komentar Realistis dalam Hitungan Detik',
-      subtitle: 'Sempurna untuk video konten kreator UGC, video reaksi TikTok, materi presentasi, edukasi, meme lucu, dan pembuatan mockup interaktif dengan kualitas gambar retina tajam serta opsi ekspor transparan murni.',
-      badge: 'UGC Creator Tool Terunggul di Indonesia',
+      title: {
+        id: 'Buat Screenshot Komentar Realistis dalam Hitungan Detik',
+        en: 'Create Realistic Comment Screenshots in Seconds'
+      },
+      subtitle: {
+        id: 'Sempurna untuk video konten kreator UGC, video reaksi TikTok, materi presentasi, edukasi, meme lucu, dan pembuatan mockup interaktif dengan kualitas gambar retina tajam serta opsi ekspor transparan murni.',
+        en: 'Perfect for UGC video content creators, TikTok reaction videos, presentations, education, funny memes, and interactive mockup building with sharp retina image quality and pure transparent export options.'
+      },
+      badge: {
+        id: 'UGC Creator Tool Terunggul di Indonesia',
+        en: 'The Premier UGC Creator Tool in Indonesia'
+      },
     },
     '/twitter-generator': {
-      title: 'Fake Tweet Generator & Aesthetic Twitter Screenshot Maker',
-      subtitle: 'Buat screenshot postingan atau komentar Twitter/X super realistis dengan lencana verifikasi biru, jumlah suka, retweet, dan mode malam gelap (Dark Mode) premium secara instan.',
-      badge: 'Aesthetic Twitter Screenshot Maker',
+      title: {
+        id: 'Fake Tweet Generator & Aesthetic Twitter Screenshot Maker',
+        en: 'Fake Tweet Generator & Aesthetic Twitter Screenshot Maker'
+      },
+      subtitle: {
+        id: 'Buat screenshot postingan atau komentar Twitter/X super realistis dengan lencana verifikasi biru, jumlah suka, retweet, dan mode malam gelap (Dark Mode) premium secara instan.',
+        en: 'Instantly create highly realistic Twitter/X posts or comments with blue verified badges, likes count, retweets, and premium Dark Mode support.'
+      },
+      badge: {
+        id: 'Aesthetic Twitter Screenshot Maker',
+        en: 'Aesthetic Twitter Screenshot Maker'
+      },
       focusPlatform: 'twitter',
     },
     '/tiktok-generator': {
-      title: 'TikTok Comment Mockup Generator & Post Builder',
-      subtitle: 'Bikin tiruan (mockup) balasan komentar video TikTok, lengkap dengan foto profil, durasi waktu, tanda suka merah, dan pin kreator untuk disematkan pada video reaksi atau CapCut Anda.',
-      badge: 'TikTok Comment Mockup Generator',
+      title: {
+        id: 'TikTok Comment Mockup Generator & Post Builder',
+        en: 'TikTok Comment Mockup Generator & Post Builder'
+      },
+      subtitle: {
+        id: 'Bikin tiruan (mockup) balasan komentar video TikTok, lengkap dengan foto profil, durasi waktu, tanda suka merah, dan pin kreator untuk disematkan pada video reaksi atau CapCut Anda.',
+        en: 'Make mockups of TikTok video comment replies, complete with profile picture, time duration, red likes count, and creator pin badge to use in your reaction videos or CapCut.'
+      },
+      badge: {
+        id: 'TikTok Comment Mockup Generator',
+        en: 'TikTok Comment Mockup Generator'
+      },
       focusPlatform: 'tiktok',
     },
     '/instagram-generator': {
-      title: 'Instagram Post Mockup Tool & Aesthetic IG Comment Editor',
-      subtitle: 'Hasilkan mockup postingan Instagram, komentar feed, atau antarmuka Instagram Live Stream secara profesional dengan lencana verifikasi biru dan tata letak asli 100% akurat.',
-      badge: 'Aesthetic IG Comment Editor',
+      title: {
+        id: 'Instagram Post Mockup Tool & Aesthetic IG Comment Editor',
+        en: 'Instagram Post Mockup Tool & Aesthetic IG Comment Editor'
+      },
+      subtitle: {
+        id: 'Hasilkan mockup postingan Instagram, komentar feed, atau antarmuka Instagram Live Stream secara profesional dengan lencana verifikasi biru dan tata letak asli 100% akurat.',
+        en: 'Professionally generate Instagram post mockups, feed comments, or Instagram Live Stream interfaces with blue verified badge and 100% accurate layout.'
+      },
+      badge: {
+        id: 'Aesthetic IG Comment Editor',
+        en: 'Aesthetic IG Comment Editor'
+      },
       focusPlatform: 'instagram',
     },
     '/youtube-generator': {
-      title: 'YouTube Comment Screenshot & Post Generator',
-      subtitle: 'Buat mockup komentar YouTube atau postingan komunitas berkualitas tinggi dengan dukungan dark mode penuh, lencana ber-verifikasi, jumlah jempol, dan pin pemilik channel.',
-      badge: 'YouTube Comment Screenshot Generator',
+      title: {
+        id: 'YouTube Comment Screenshot & Post Generator',
+        en: 'YouTube Comment Screenshot & Post Generator'
+      },
+      subtitle: {
+        id: 'Buat mockup komentar YouTube atau postingan komunitas berkualitas tinggi dengan dukungan dark mode penuh, lencana ber-verifikasi, jumlah jempol, dan pin pemilik channel.',
+        en: 'Create high-quality YouTube comment or community post mockups with full dark mode support, verified badge, thumbs up count, and channel owner pin.'
+      },
+      badge: {
+        id: 'YouTube Comment Screenshot Generator',
+        en: 'YouTube Comment Screenshot Generator'
+      },
       focusPlatform: 'youtube',
     },
     '/kick-generator': {
-      title: 'Kick Live Chat Mockup Generator & Stream Builder',
-      subtitle: 'Buat screenshot atau tiruan obrolan langsung (live chat) Kick dengan warna badge langganan hijau, lencana moderator, nama pengguna berwarna, dan gaya teks realistis.',
-      badge: 'Kick Live Chat Mockup Generator',
+      title: {
+        id: 'Kick Live Chat Mockup Generator & Stream Builder',
+        en: 'Kick Live Chat Mockup Generator & Stream Builder'
+      },
+      subtitle: {
+        id: 'Buat screenshot atau tiruan obrolan langsung (live chat) Kick dengan warna badge langganan hijau, lencana moderator, nama pengguna berwarna, dan gaya teks realistis.',
+        en: 'Create Kick live chat screenshots or mockups with green subscription badges, moderator badges, custom colored usernames, and realistic style.'
+      },
+      badge: {
+        id: 'Kick Live Chat Mockup Generator',
+        en: 'Kick Live Chat Mockup Generator'
+      },
       focusPlatform: 'kick_live',
     }
   };
 
   const normalizedPath = pathData[currentPath] ? currentPath : '/';
-  const meta = pathData[normalizedPath];
+  const pathMeta = pathData[normalizedPath];
+  const meta = {
+    title: pathMeta.title[language],
+    subtitle: pathMeta.subtitle[language],
+    badge: pathMeta.badge[language],
+    focusPlatform: pathMeta.focusPlatform
+  };
 
   return (
     <div className="min-h-screen bg-[var(--root-bg)] text-[var(--root-fg)] selection:bg-blue-500/20">
@@ -140,7 +212,17 @@ export function LandingPage({
             onClick={() => onStartEditor(meta.focusPlatform)}
             className="text-xs font-bold text-[var(--text-muted)] hover:text-[var(--root-fg)] transition-colors cursor-pointer"
           >
-            Buka Editor
+            {t('header.openEditor')}
+          </button>
+
+          {/* Language Switcher */}
+          <button
+            onClick={() => setLanguage(language === 'id' ? 'en' : 'id')}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[var(--input-bg)] border border-[var(--panel-border)] text-xs font-bold hover:bg-[var(--button-hover)] text-[var(--root-fg)] transition-all cursor-pointer"
+            title={language === 'id' ? 'Switch to English' : 'Ganti ke Bahasa Indonesia'}
+          >
+            <Globe className="w-3.5 h-3.5 text-[var(--text-muted)]" />
+            <span className="tracking-wide">{language === 'id' ? 'ID' : 'EN'}</span>
           </button>
           
           {currentUser ? (
@@ -156,7 +238,7 @@ export function LandingPage({
               onClick={onLoginClick}
               className="px-3 py-1.5 rounded-xl text-xs font-bold bg-[var(--input-bg)] border border-[var(--panel-border)] hover:bg-[var(--button-hover)] text-[var(--root-fg)] transition-all cursor-pointer"
             >
-              Masuk Akun
+              {t('header.login')}
             </button>
           )}
 
@@ -169,10 +251,11 @@ export function LandingPage({
             }`}
           >
             <Zap className="w-3 h-3 fill-current" />
-            {isPremium ? 'PRO Aktif' : 'Coba PRO'}
+            {isPremium ? (language === 'id' ? 'PRO Aktif' : 'PRO Active') : (language === 'id' ? 'Coba PRO' : 'Try PRO')}
           </button>
         </div>
       </nav>
+
 
       {/* Main Content Areas */}
       {currentPath === '/terms' ? (
@@ -309,7 +392,7 @@ export function LandingPage({
             </div>
 
             <h1 className="text-4xl sm:text-6xl font-black tracking-tight leading-[1.1] max-w-3xl">
-              {meta.title.split('&')[0]} <span className="bg-gradient-to-r from-blue-500 via-indigo-500 to-pink-500 bg-clip-text text-transparent">{meta.title.includes('&') ? '& ' + meta.title.split('&')[1] : 'Hitungan Detik'}</span>
+              {meta.title.split('&')[0]} <span className="bg-gradient-to-r from-blue-500 via-indigo-500 to-pink-500 bg-clip-text text-transparent">{meta.title.includes('&') ? '& ' + meta.title.split('&')[1] : (language === 'id' ? 'Hitungan Detik' : 'In Seconds')}</span>
             </h1>
 
             <p className="text-sm sm:text-base text-[var(--text-muted)] max-w-2xl mt-6 leading-relaxed">
@@ -321,7 +404,7 @@ export function LandingPage({
                 onClick={() => onStartEditor(meta.focusPlatform)}
                 className="px-6 py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm rounded-2xl flex items-center gap-2 shadow-lg hover:shadow-blue-500/10 transition-all transform hover:-translate-y-0.5 cursor-pointer"
               >
-                Mulai Buat Komentar
+                {t('landing.start')}
                 <ArrowRight className="w-4 h-4" />
               </button>
               
@@ -330,13 +413,13 @@ export function LandingPage({
                 className="px-6 py-3.5 bg-[var(--panel-bg)] hover:bg-[var(--button-hover)] text-[var(--root-fg)] font-bold text-sm rounded-2xl border border-[var(--panel-border)] flex items-center justify-center gap-2 transition-all transform hover:-translate-y-0.5 cursor-pointer"
               >
                 <Zap className="w-4 h-4 text-yellow-500 fill-yellow-500" />
-                Bandingkan Paket PRO
+                {t('landing.compare')}
               </button>
             </div>
 
             {/* Supporting Platforms Logo banner */}
             <div className="mt-16 w-full max-w-4xl border-t border-b border-[var(--panel-border)]/70 py-6 flex flex-col gap-4">
-              <p className="text-[10px] uppercase font-bold tracking-widest text-[var(--text-muted)]">Mendukung Layout Platform Terlengkap</p>
+              <p className="text-[10px] uppercase font-bold tracking-widest text-[var(--text-muted)]">{t('landing.platformsDesc')}</p>
               <div className="flex flex-wrap justify-center items-center gap-6 sm:gap-10">
                 {platforms.map((p, i) => (
                   <div 
@@ -356,8 +439,8 @@ export function LandingPage({
           <section className="px-4 py-16 bg-[var(--panel-bg)] border-t border-b border-[var(--panel-border)]/50">
             <div className="max-w-5xl mx-auto">
               <div className="text-center mb-12">
-                <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight">Dikembangkan Khusus untuk Kebutuhan Kreatif</h2>
-                <p className="text-xs text-[var(--text-muted)] mt-1.5">Setiap elemen didesain presisi agar pixel-perfect menyerupai tampilan aplikasi aslinya.</p>
+                <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight">{t('landing.featuresTitle')}</h2>
+                <p className="text-xs text-[var(--text-muted)] mt-1.5">{t('landing.featuresDesc')}</p>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -392,42 +475,42 @@ export function LandingPage({
           <section className="px-4 py-16 bg-[var(--panel-bg)]/60 border-t border-[var(--panel-border)]">
             <div className="max-w-4xl mx-auto text-center">
               <div className="mb-12">
-                <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight">Rencana Harga Berlangganan</h2>
-                <p className="text-xs text-[var(--text-muted)] mt-1.5">Gratis selamanya dengan opsi upgrade PRO Creator untuk hasil tanpa batas.</p>
+                <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight">{t('pricing.title')}</h2>
+                <p className="text-xs text-[var(--text-muted)] mt-1.5">{t('pricing.subtitle')}</p>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-2xl mx-auto text-left">
                 {/* Free Plan */}
                 <div className="bg-[var(--root-bg)] border border-[var(--panel-border)] rounded-3xl p-6.5 flex flex-col justify-between shadow-sm relative overflow-hidden">
                   <div>
-                    <h3 className="text-lg font-black">Free Plan</h3>
-                    <p className="text-xs text-[var(--text-muted)] mt-1">Cocok untuk kreator pemula</p>
+                    <h3 className="text-lg font-black">{t('pricing.free.title')}</h3>
+                    <p className="text-xs text-[var(--text-muted)] mt-1">{t('pricing.free.desc')}</p>
                     
                     <div className="my-6">
-                      <span className="text-3xl font-black">Rp 0</span>
-                      <span className="text-xs text-[var(--text-muted)]"> / selamanya</span>
+                      <span className="text-3xl font-black">{t('pricing.free.price')}</span>
+                      <span className="text-xs text-[var(--text-muted)]">{t('pricing.free.period')}</span>
                     </div>
 
                     <div className="space-y-3.5 text-xs">
                       <div className="flex gap-2.5 items-start">
                         <Check className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
-                        <span>Maksimal **30 Ekspor per hari**</span>
+                        <span>{language === 'id' ? 'Maksimal **30 Ekspor per hari**' : 'Maximum of **30 Exports per day**'}</span>
                       </div>
                       <div className="flex gap-2.5 items-start">
                         <Check className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
-                        <span>Akses ke semua tata letak layout platform</span>
+                        <span>{language === 'id' ? 'Akses ke semua tata letak layout platform' : 'Access to all platform layout designs'}</span>
                       </div>
                       <div className="flex gap-2.5 items-start">
                         <Check className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
-                        <span>Opsi kustomisasi penuh & multi-komen</span>
+                        <span>{language === 'id' ? 'Opsi kustomisasi penuh & multi-komen' : 'Full customization & multi-comment options'}</span>
                       </div>
                       <div className="flex gap-2.5 items-start opacity-40">
                         <XIcon className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
-                        <span>Kualitas gambar standar 1X</span>
+                        <span>{language === 'id' ? 'Kualitas gambar standar 1X' : 'Standard 1X image quality'}</span>
                       </div>
                       <div className="flex gap-2.5 items-start opacity-40">
                         <XIcon className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
-                        <span>Ada watermark tipis SocialCanvas</span>
+                        <span>{language === 'id' ? 'Ada watermark tipis SocialCanvas' : 'Subtle SocialCanvas watermark included'}</span>
                       </div>
                     </div>
                   </div>
@@ -436,49 +519,49 @@ export function LandingPage({
                     onClick={() => onStartEditor(meta.focusPlatform)}
                     className="w-full mt-8 py-3 bg-[var(--panel-bg)] hover:bg-[var(--button-hover)] border border-[var(--panel-border)] text-[var(--root-fg)] font-bold text-xs rounded-xl transition-all cursor-pointer"
                   >
-                    Mulai Gratis Sekarang
+                    {t('pricing.free.btn')}
                   </button>
                 </div>
 
                 {/* PRO Creator Plan */}
                 <div className="bg-[var(--root-bg)] border-2 border-blue-500/40 rounded-3xl p-6.5 flex flex-col justify-between shadow-lg relative overflow-hidden">
                   <div className="absolute top-3.5 right-3.5 bg-gradient-to-r from-blue-500 to-indigo-500 text-white text-[9px] font-black uppercase px-2 py-0.5 rounded-md tracking-wider">
-                    Rekomendasi
+                    {t('pricing.recommended')}
                   </div>
                   
                   <div>
                     <h3 className="text-lg font-black text-blue-400 flex items-center gap-1.5">
-                      PRO Creator
+                      {t('pricing.pro.title').split(' ')[0]} {t('pricing.pro.title').split(' ').slice(1).join(' ')}
                       <Crown className="w-4 h-4 text-yellow-400 fill-yellow-400" />
                     </h3>
-                    <p className="text-xs text-[var(--text-muted)] mt-1">Sempurna untuk UGC Creator Indonesia profesional</p>
+                    <p className="text-xs text-[var(--text-muted)] mt-1">{t('pricing.pro.desc')}</p>
                     
                     <div className="my-6">
-                      <div className="text-xs text-[var(--text-muted)] line-through">Rp 199.000</div>
-                      <span className="text-3xl font-black text-blue-500">Rp 49.000</span>
-                      <span className="text-xs text-[var(--text-muted)]"> / bulan</span>
+                      <div className="text-xs text-[var(--text-muted)] line-through">{language === 'id' ? 'Rp 199.000' : '$9.99'}</div>
+                      <span className="text-3xl font-black text-blue-500">{t('pricing.pro.price')}</span>
+                      <span className="text-xs text-[var(--text-muted)]">{t('pricing.pro.period')}</span>
                     </div>
 
                     <div className="space-y-3.5 text-xs">
                       <div className="flex gap-2.5 items-start">
                         <Check className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
-                        <span className="font-semibold text-blue-400">Ekspor tanpa batas harian (Unlimited)</span>
+                        <span className="font-semibold text-blue-400">{language === 'id' ? 'Ekspor tanpa batas harian (Unlimited)' : 'Unlimited daily exports (No limits)'}</span>
                       </div>
                       <div className="flex gap-2.5 items-start">
                         <Check className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
-                        <span>Resolusi Ultra HD (Penskalaan Gambar 4x)</span>
+                        <span>{language === 'id' ? 'Resolusi Ultra HD (Penskalaan Gambar 4x)' : 'Ultra HD Retina quality (4X image scaling)'}</span>
                       </div>
                       <div className="flex gap-2.5 items-start">
                         <Check className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
-                        <span className="font-semibold">Fitur Ekspor Video Animasi (Segera Hadir)</span>
+                        <span className="font-semibold">{language === 'id' ? 'Fitur Ekspor Video Animasi (Segera Hadir)' : 'Animated Video Export Feature (Coming Soon)'}</span>
                       </div>
                       <div className="flex gap-2.5 items-start">
                         <Check className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
-                        <span>Bebas dari Watermark & Iklan</span>
+                        <span>{language === 'id' ? 'Bebas dari Watermark & Iklan' : 'Completely Ad & Watermark Free'}</span>
                       </div>
                       <div className="flex gap-2.5 items-start">
                         <Check className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
-                        <span>Dukungan prioritas & request layout khusus</span>
+                        <span>{language === 'id' ? 'Dukungan prioritas & request layout khusus' : 'Priority support & custom layout requests'}</span>
                       </div>
                     </div>
                   </div>
@@ -487,7 +570,7 @@ export function LandingPage({
                     onClick={onUpgradeClick}
                     className="w-full mt-8 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-xs rounded-xl shadow-md transition-all cursor-pointer"
                   >
-                    {isPremium ? 'Sudah Aktif' : 'Berlangganan PRO Sekarang'}
+                    {isPremium ? (language === 'id' ? 'Sudah Aktif' : 'Already Active') : t('pricing.pro.btn')}
                   </button>
                 </div>
               </div>

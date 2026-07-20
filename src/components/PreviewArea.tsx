@@ -400,9 +400,9 @@ export function PreviewArea({
                <button
                  key={p.id}
                  onClick={() => onStateChange({ platform: p.id })}
-                 className={`relative flex items-center shrink-0 gap-1.5 px-2 sm:px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 ${
+                 className={`relative flex items-center justify-center shrink-0 p-2 sm:p-2.5 rounded-lg transition-all duration-200 ${
                    isActive 
-                     ? 'bg-[var(--root-bg)] shadow-sm text-[var(--root-fg)] font-bold' 
+                     ? 'bg-[var(--root-bg)] shadow-sm text-[var(--root-fg)]' 
                      : 'text-[var(--text-muted)] hover:text-[var(--root-fg)] hover:bg-[var(--button-hover)]/40'
                  }`}
                  title={`Switch to ${p.label}`}
@@ -410,7 +410,6 @@ export function PreviewArea({
                  <span className={`w-4 h-4 sm:w-4.5 sm:h-4.5 flex items-center justify-center transition-transform ${isActive ? 'scale-110' : 'opacity-80'}`}>
                    {p.icon}
                  </span>
-                 <span className="hidden lg:inline text-[11px]">{p.label}</span>
                </button>
              );
            })}
@@ -740,7 +739,7 @@ export function PreviewArea({
       </div>
 
       {/* Canvas Status Bar */}
-      <div className="h-8 border-t border-[var(--panel-border)] bg-[var(--panel-bg)] flex items-center px-4 justify-between text-[10px] text-[var(--text-muted)] font-mono shrink-0 select-none">
+      <div className="h-8 border-t border-[var(--panel-border)] bg-[var(--panel-bg)] flex items-center px-4 justify-between text-[10px] text-[var(--text-muted)] font-mono shrink-0 select-none relative z-30">
         <div className="flex gap-4 items-center">
           <span>{Math.round(scale * 100)}%</span>
           <span className="opacity-30">|</span>

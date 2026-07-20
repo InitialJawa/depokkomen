@@ -4,6 +4,7 @@ import { X, Mail, Check, LogIn, Chrome, ShieldAlert, Sparkles, User, HelpCircle,
 import { Button } from './ui';
 import { auth } from '../lib/firebase';
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, sendPasswordResetEmail } from 'firebase/auth';
+import { useLanguage } from '../contexts/LanguageContext';
 
 interface UserProfile {
   name: string;
@@ -22,6 +23,7 @@ interface Props {
 }
 
 export function AuthModal({ isOpen, onClose, onLoginSuccess, currentUser, onLogout }: Props) {
+  const { language, t } = useLanguage();
   const [activeTab, setActiveTab] = useState<'login' | 'register' | 'forgot'>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -46,13 +48,13 @@ export function AuthModal({ isOpen, onClose, onLoginSuccess, currentUser, onLogo
       };
       
       onLoginSuccess(user);
-      setSuccessMessage('Berhasil masuk dengan Google!');
+      setSuccessMessage(t('auth.successGoogle'));
       setTimeout(() => {
         setSuccessMessage('');
         onClose();
       }, 1500);
     } catch (error: any) {
-      setErrorMessage(error.message || 'Gagal masuk dengan Google.');
+      setErrorMessage(error.message || t('auth.failGoogle'));
     } finally {
       setIsSubmitting(false);
     }
@@ -81,13 +83,13 @@ export function AuthModal({ isOpen, onClose, onLoginSuccess, currentUser, onLogo
       };
       
       onLoginSuccess(user);
-      setSuccessMessage(activeTab === 'register' ? 'Berhasil mendaftar!' : 'Berhasil masuk!');
+      setSuccessMessage(activeTab === 'register' ? t('auth.successRegister') : t('auth.successLogin'));
       setTimeout(() => {
         setSuccessMessage('');
         onClose();
       }, 1500);
     } catch (error: any) {
-      setErrorMessage(error.message || 'Terjadi kesalahan otentikasi.');
+      setErrorMessage(error.message || t('auth.errorAuth'));
     } finally {
       setIsSubmitting(false);
     }
@@ -96,7 +98,7 @@ export function AuthModal({ isOpen, onClose, onLoginSuccess, currentUser, onLogo
   const handleForgotPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email) {
-      setErrorMessage('Masukkan email Anda.');
+      setErrorMessage(t('auth.enterEmail'));
       return;
     }
     
@@ -104,13 +106,13 @@ export function AuthModal({ isOpen, onClose, onLoginSuccess, currentUser, onLogo
     setErrorMessage('');
     try {
       await sendPasswordResetEmail(auth, email);
-      setSuccessMessage('Email reset password telah dikirim. Periksa kotak masuk Anda.');
+      setSuccessMessage(t('auth.successReset'));
       setTimeout(() => {
         setSuccessMessage('');
         setActiveTab('login');
       }, 3000);
     } catch (error: any) {
-      setErrorMessage(error.message || 'Gagal mengirim email reset password.');
+      setErrorMessage(error.message || t('auth.failReset'));
     } finally {
       setIsSubmitting(false);
     }
@@ -127,7 +129,7 @@ export function AuthModal({ isOpen, onClose, onLoginSuccess, currentUser, onLogo
         isGuest: true,
       };
       onLoginSuccess(guestUser);
-      setSuccessMessage('Masuk sebagai Akun Tamu (Guest)!');
+      setSuccessMessage(t('auth.successGuest'));
       setTimeout(() => {
         setSuccessMessage('');
         onClose();
@@ -170,7 +172,7 @@ export function AuthModal({ isOpen, onClose, onLoginSuccess, currentUser, onLogo
                 <Check className="w-8 h-8" />
               </div>
               <div>
-                <h3 className="text-lg font-bold text-emerald-500">Sukses!</h3>
+                <h3 className="text-lg font-bold text-emerald-500">{t('auth.success')}</h3>
                 <p className="text-xs text-[var(--text-muted)] mt-1">{successMessage}</p>
               </div>
             </div>
@@ -183,23 +185,23 @@ export function AuthModal({ isOpen, onClose, onLoginSuccess, currentUser, onLogo
                 <h3 className="text-lg font-bold">{currentUser.name}</h3>
                 <p className="text-xs text-[var(--text-muted)]">{currentUser.email}</p>
                 <div className="mt-2.5 inline-flex text-[10px] font-bold px-2.5 py-1 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/10 uppercase tracking-wider">
-                  {currentUser.isGuest ? 'Akun Tamu (Guest)' : 'Akun Terdaftar'}
+                  {currentUser.isGuest ? t('auth.guestAccount') : t('auth.registeredAccount')}
                 </div>
               </div>
 
               <div className="p-4 bg-[var(--root-bg)] border border-[var(--panel-border)] rounded-2xl text-left text-xs space-y-2">
-                <p className="font-semibold text-[var(--root-fg)]">Informasi Sesi Akun</p>
+                <p className="font-semibold text-[var(--root-fg)]">{t('auth.sessionInfo')}</p>
                 <p className="text-[11px] text-[var(--text-muted)] leading-relaxed">
-                  Semua komentar mockup yang Anda edit akan otomatis disimpan ke penyimpanan lokal Anda agar tidak hilang saat halaman disegarkan.
+                  {t('auth.sessionInfoDesc')}
                 </p>
               </div>
 
               <div className="flex gap-2.5 mt-2">
                 <Button variant="secondary" onClick={onClose} className="flex-1 h-10 text-xs font-bold rounded-xl">
-                  Tutup
+                  {t('auth.close')}
                 </Button>
                 <Button variant="danger" onClick={() => { onLogout(); onClose(); }} className="flex-1 h-10 text-xs font-bold rounded-xl">
-                  Keluar Akun
+                  {t('auth.logout')}
                 </Button>
               </div>
             </div>
@@ -210,9 +212,9 @@ export function AuthModal({ isOpen, onClose, onLoginSuccess, currentUser, onLogo
                 <div className="inline-flex items-center gap-1.5 bg-blue-500/15 text-blue-400 text-[10px] font-bold px-2.5 py-0.5 rounded-full border border-blue-500/10 mb-2 uppercase tracking-wider">
                   <User className="w-3 h-3" /> Akun SocialCanvas
                 </div>
-                <h3 className="text-xl font-extrabold tracking-tight">Masuk atau Daftar</h3>
+                <h3 className="text-xl font-extrabold tracking-tight">{t('auth.loginOrRegister')}</h3>
                 <p className="text-xs text-[var(--text-muted)] mt-1">
-                  Pilih metode masuk akun Anda untuk mengaktifkan batas ekspor harian.
+                  {t('auth.loginOrRegisterDesc')}
                 </p>
               </div>
               
@@ -233,7 +235,7 @@ export function AuthModal({ isOpen, onClose, onLoginSuccess, currentUser, onLogo
                       : 'border-transparent text-[var(--text-muted)] hover:text-[var(--root-fg)]'
                   }`}
                 >
-                  Masuk
+                  {t('auth.login')}
                 </button>
                 <button
                   onClick={() => setActiveTab('register')}
@@ -243,7 +245,7 @@ export function AuthModal({ isOpen, onClose, onLoginSuccess, currentUser, onLogo
                       : 'border-transparent text-[var(--text-muted)] hover:text-[var(--root-fg)]'
                   }`}
                 >
-                  Daftar
+                  {t('auth.register')}
                 </button>
                 <button
                   onClick={() => setActiveTab('forgot')}
@@ -253,17 +255,17 @@ export function AuthModal({ isOpen, onClose, onLoginSuccess, currentUser, onLogo
                       : 'border-transparent text-[var(--text-muted)] hover:text-[var(--root-fg)]'
                   }`}
                 >
-                  Lupa Sandi
+                  {t('auth.forgotPassword')}
                 </button>
               </div>
 
               {activeTab === 'forgot' ? (
                 <form onSubmit={handleForgotPassword} className="flex flex-col gap-4">
                   <div className="text-xs text-[var(--text-muted)] mb-2">
-                    Masukkan email akun Anda. Kami akan mengirimkan tautan untuk menyetel ulang kata sandi.
+                    {t('auth.forgotPasswordDesc')}
                   </div>
                   <div>
-                    <label className="block text-[10px] uppercase font-bold text-[var(--text-muted)] mb-1">Alamat Email</label>
+                    <label className="block text-[10px] uppercase font-bold text-[var(--text-muted)] mb-1">{t('auth.emailAddress')}</label>
                     <input
                       type="email"
                       required
@@ -279,18 +281,18 @@ export function AuthModal({ isOpen, onClose, onLoginSuccess, currentUser, onLogo
                     disabled={isSubmitting || !email}
                     className="w-full h-11 bg-pink-600 hover:bg-pink-700 text-sm font-bold gap-2 rounded-xl mt-1"
                   >
-                    {isSubmitting ? 'Mengirim...' : 'Kirim Link Reset'}
+                    {isSubmitting ? t('auth.sending') : t('auth.sendResetLink')}
                   </Button>
                 </form>
               ) : (
                 <form onSubmit={handleEmailAuth} className="flex flex-col gap-4">
                   {activeTab === 'register' && (
                     <div>
-                      <label className="block text-[10px] uppercase font-bold text-[var(--text-muted)] mb-1">Nama Kreator</label>
+                      <label className="block text-[10px] uppercase font-bold text-[var(--text-muted)] mb-1">{t('auth.creatorName')}</label>
                       <input
                         type="text"
                         required
-                        placeholder="Contoh: Andi Wijaya"
+                        placeholder={t('auth.creatorNamePlaceholder')}
                         value={name}
                         onChange={(e) => setName(e.target.value)}
                         className="w-full bg-[var(--root-bg)] border border-[var(--panel-border)] rounded-xl px-3 py-2.5 text-xs outline-none focus:border-blue-500 text-[var(--root-fg)]"
@@ -298,7 +300,7 @@ export function AuthModal({ isOpen, onClose, onLoginSuccess, currentUser, onLogo
                     </div>
                   )}
                   <div>
-                    <label className="block text-[10px] uppercase font-bold text-[var(--text-muted)] mb-1">Alamat Email</label>
+                    <label className="block text-[10px] uppercase font-bold text-[var(--text-muted)] mb-1">{t('auth.emailAddress')}</label>
                     <input
                       type="email"
                       required
@@ -309,11 +311,11 @@ export function AuthModal({ isOpen, onClose, onLoginSuccess, currentUser, onLogo
                     />
                   </div>
                   <div>
-                    <label className="block text-[10px] uppercase font-bold text-[var(--text-muted)] mb-1">Kata Sandi</label>
+                    <label className="block text-[10px] uppercase font-bold text-[var(--text-muted)] mb-1">{t('auth.password')}</label>
                     <input
                       type="password"
                       required
-                      placeholder="Minimal 6 karakter"
+                      placeholder={t('auth.passwordPlaceholder')}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       className="w-full bg-[var(--root-bg)] border border-[var(--panel-border)] rounded-xl px-3 py-2.5 text-xs outline-none focus:border-blue-500 text-[var(--root-fg)]"
@@ -325,14 +327,14 @@ export function AuthModal({ isOpen, onClose, onLoginSuccess, currentUser, onLogo
                     disabled={isSubmitting || !email || !password}
                     className="w-full h-11 bg-blue-600 hover:bg-blue-700 text-sm font-bold gap-2 rounded-xl mt-1"
                   >
-                    {isSubmitting ? 'Memproses...' : (activeTab === 'register' ? 'Daftar Sekarang' : 'Masuk Akun')}
+                    {isSubmitting ? t('auth.processing') : (activeTab === 'register' ? t('auth.registerNow') : t('auth.loginAccount'))}
                   </Button>
                 </form>
               )}
               
               <div className="relative my-1">
                 <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-[var(--panel-border)]"></div></div>
-                <div className="relative flex justify-center text-[10px] uppercase font-bold"><span className="bg-[var(--panel-bg)] px-2 text-[var(--text-muted)]">Atau</span></div>
+                <div className="relative flex justify-center text-[10px] uppercase font-bold"><span className="bg-[var(--panel-bg)] px-2 text-[var(--text-muted)]">{t('auth.or')}</span></div>
               </div>
               
               <div className="flex flex-col gap-2.5">
@@ -344,7 +346,7 @@ export function AuthModal({ isOpen, onClose, onLoginSuccess, currentUser, onLogo
                 >
                   <div className="flex items-center gap-2.5">
                     <Chrome className="w-4 h-4 text-blue-500" />
-                    <span>Masuk dengan Google</span>
+                    <span>{t('auth.loginWithGoogle')}</span>
                   </div>
                 </button>
 
@@ -356,13 +358,13 @@ export function AuthModal({ isOpen, onClose, onLoginSuccess, currentUser, onLogo
                 >
                   <div className="flex items-center gap-2.5">
                     <HelpCircle className="w-4 h-4 text-slate-400" />
-                    <span>Lanjutkan sebagai Tamu</span>
+                    <span>{t('auth.continueAsGuest')}</span>
                   </div>
                 </button>
               </div>
 
               <p className="text-[10px] text-center text-[var(--text-muted)] leading-relaxed">
-                Penting: Pastikan Anda telah mengaktifkan <b>Email/Password provider</b> di Firebase Console Anda jika fitur pendaftaran gagal.
+                {t('auth.importantFirebase')}
               </p>
             </div>
           )}

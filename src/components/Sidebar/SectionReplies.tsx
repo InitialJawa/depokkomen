@@ -3,6 +3,7 @@ import { CommentState } from '../../types';
 import { Button } from '../ui';
 import { Plus, Trash2, GripVertical, Copy, Edit2 } from 'lucide-react';
 import { Reorder } from 'motion/react';
+import { useLanguage } from '../../contexts/LanguageContext';
 
 interface Props {
   state: CommentState;
@@ -12,6 +13,7 @@ interface Props {
 }
 
 export function SectionReplies({ state, onChange, onEditReply, onAddReply }: Props) {
+  const { language, t } = useLanguage();
   const isLiveMode = state.platform === 'kick_live' || (state.platform === 'instagram' && state.instagramTemplate === 'live');
   
   // Choose which list to render
@@ -39,6 +41,8 @@ export function SectionReplies({ state, onChange, onEditReply, onAddReply }: Pro
     onChange({ [listKey]: newItems } as any);
   };
 
+  const itemTypeName = isLiveMode ? t('replies.comment') : t('replies.reply');
+
   return (
     <div className="flex flex-col gap-4">
       <Button 
@@ -47,14 +51,14 @@ export function SectionReplies({ state, onChange, onEditReply, onAddReply }: Pro
         className="w-full font-bold bg-pink-500/10 hover:bg-pink-500/20 text-pink-500 border-pink-500/20 cursor-pointer"
       >
         <Plus className="w-4 h-4 mr-2" />
-        Tambah {isLiveMode ? 'Komentar' : 'Balasan'} Baru
+        {t('replies.add', { type: itemTypeName })}
       </Button>
 
       {items.length === 0 && (
         <div className="text-center py-8 text-xs text-[var(--text-muted)] border border-dashed border-[var(--panel-border)] rounded-lg bg-[var(--root-bg)]">
-          Belum ada {isLiveMode ? 'komentar' : 'balasan'}.
+          {t('replies.empty', { type: itemTypeName.toLowerCase() })}
           <br />
-          <span className="opacity-70 mt-1 block">Klik tombol di atas untuk menambah.</span>
+          <span className="opacity-70 mt-1 block">{t('replies.emptyDesc')}</span>
         </div>
       )}
 
@@ -71,7 +75,7 @@ export function SectionReplies({ state, onChange, onEditReply, onAddReply }: Pro
                 <div 
                   className="flex items-center p-3 gap-2.5 bg-[var(--panel-bg)] hover:bg-[var(--root-bg)] transition-colors cursor-pointer group"
                   onClick={() => onEditReply?.(item.id)}
-                  title="Klik untuk mengedit balasan ini"
+                  title={t('replies.clickToEdit')}
                 >
                   <div 
                     className="cursor-grab active:cursor-grabbing p-1 text-[var(--text-muted)] hover:text-[var(--root-fg)] shrink-0" 
@@ -102,7 +106,7 @@ export function SectionReplies({ state, onChange, onEditReply, onAddReply }: Pro
                       )}
                     </div>
                     <span className="text-[10px] text-[var(--text-muted)] truncate mt-0.5">
-                      {item.commentText || '(Kosong)'}
+                      {item.commentText || (language === 'id' ? '(Kosong)' : '(Empty)')}
                     </span>
                   </div>
 
@@ -111,21 +115,21 @@ export function SectionReplies({ state, onChange, onEditReply, onAddReply }: Pro
                     <button 
                       onClick={() => onEditReply?.(item.id)}
                       className="p-1.5 text-[var(--text-muted)] hover:text-pink-500 rounded-md hover:bg-pink-500/10 cursor-pointer transition-all"
-                      title="Edit Balasan"
+                      title={t('replies.edit')}
                     >
                       <Edit2 className="w-3.5 h-3.5" />
                     </button>
                     <button 
                       onClick={() => handleDuplicate(item)}
                       className="p-1.5 text-[var(--text-muted)] hover:text-blue-500 rounded-md hover:bg-blue-500/10 cursor-pointer transition-all"
-                      title="Duplikat"
+                      title={t('replies.duplicate')}
                     >
                       <Copy className="w-3.5 h-3.5" />
                     </button>
                     <button 
                       onClick={() => handleRemove(item.id)}
                       className="p-1.5 text-[var(--text-muted)] hover:text-red-500 rounded-md hover:bg-red-500/10 cursor-pointer transition-all"
-                      title="Hapus"
+                      title={t('replies.remove')}
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
