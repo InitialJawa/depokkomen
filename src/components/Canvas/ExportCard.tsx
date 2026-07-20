@@ -25,10 +25,10 @@ export function ExportCard({ onExport, isExporting, isPremium, exportCount, onUp
 
   return (
     <>
-      {/* Collapsible Trigger Button in the Top-Right Corner */}
+      {/* Collapsible Trigger Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="absolute top-4 right-4 z-30 flex items-center gap-2 px-3.5 py-2 bg-[var(--panel-bg)]/90 backdrop-blur-md border border-[var(--panel-border)] hover:border-blue-500/50 hover:bg-[var(--button-hover)] text-[var(--root-fg)] font-semibold text-xs rounded-xl shadow-md transition-all cursor-pointer select-none"
+        className="flex items-center gap-2 px-3.5 py-2 bg-[var(--panel-bg)]/90 backdrop-blur-md border border-[var(--panel-border)] hover:border-blue-500/50 hover:bg-[var(--button-hover)] text-[var(--root-fg)] font-semibold text-xs rounded-xl shadow-md transition-all cursor-pointer select-none"
       >
         <Download className="w-4 h-4 text-blue-500" />
         <span>Export</span>
@@ -43,7 +43,7 @@ export function ExportCard({ onExport, isExporting, isPremium, exportCount, onUp
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -10, scale: 0.95 }}
             transition={{ duration: 0.15, ease: 'easeOut' }}
-            className="absolute top-16 right-4 w-[280px] bg-[var(--panel-bg)]/95 backdrop-blur-xl border border-[var(--panel-border)] shadow-xl rounded-2xl p-4 z-30 flex flex-col gap-4"
+            className="absolute top-[110%] right-0 w-[280px] bg-[var(--panel-bg)]/95 backdrop-blur-xl border border-[var(--panel-border)] shadow-xl rounded-2xl p-4 z-30 flex flex-col gap-4"
           >
             <div className="flex items-center gap-2 text-[var(--root-fg)] font-semibold text-sm">
               <ImageIcon className="w-4 h-4 text-blue-500" />

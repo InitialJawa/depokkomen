@@ -57,7 +57,7 @@ export function UpgradeModal({ isOpen, onClose, onUpgradeSuccess, isPremium, onD
           initial={{ opacity: 0, scale: 0.9, y: 15 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.9, y: 15 }}
-          className="relative w-full max-w-lg bg-[var(--panel-bg)] border border-[var(--panel-border)] shadow-2xl rounded-3xl overflow-hidden z-10 text-[var(--root-fg)]"
+          className="relative w-full max-w-lg max-h-full bg-[var(--panel-bg)] border border-[var(--panel-border)] shadow-2xl rounded-3xl overflow-y-auto custom-scrollbar z-10 text-[var(--root-fg)]"
         >
           {/* Top colored accent line */}
           <div className="h-1.5 bg-gradient-to-r from-blue-500 via-indigo-500 to-pink-500 w-full" />

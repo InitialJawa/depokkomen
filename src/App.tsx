@@ -28,6 +28,9 @@ import {
   UserCheck
 } from 'lucide-react';
 
+import { auth } from './lib/firebase';
+import { signOut } from 'firebase/auth';
+
 export interface UserProfile {
   name: string;
   email: string;
@@ -182,7 +185,12 @@ export default function App() {
     localStorage.setItem('socialcanvas_user', JSON.stringify(user));
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+    } catch (e) {
+      console.error(e);
+    }
     setCurrentUser(null);
     localStorage.removeItem('socialcanvas_user');
     localStorage.removeItem('depokkomen_user');
@@ -225,6 +233,23 @@ export default function App() {
   const [past, setPast] = useState<typeof defaultState[]>([]);
   const [future, setFuture] = useState<typeof defaultState[]>([]);
 
+  const [snapshots, setSnapshots] = useState<{id: string, url: string, timestamp: string}[]>(() => {
+    const saved = localStorage.getItem('socialcanvas_snapshots');
+    return saved ? JSON.parse(saved) : [];
+  });
+
+  useEffect(() => {
+    localStorage.setItem('socialcanvas_snapshots', JSON.stringify(snapshots));
+  }, [snapshots]);
+
+  const handleAddSnapshot = (url: string) => {
+    setSnapshots(prev => [{ id: Math.random().toString(36).substring(2, 9), url, timestamp: new Date().toLocaleTimeString() }, ...prev]);
+  };
+
+  const handleDeleteSnapshot = (id: string) => {
+    setSnapshots(prev => prev.filter(s => s.id !== id));
+  };
+
   const handleStateChange = (updates: Partial<typeof defaultState>) => {
     setState(prev => {
       const newState = { ...prev, ...updates };
@@ -259,6 +284,41 @@ export default function App() {
     setPast(p => [...p, state]);
     setState(next);
   };
+
+  // Global Keyboard Shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+      const cmdOrCtrl = isMac ? e.metaKey : e.ctrlKey;
+      
+      const activeEl = document.activeElement;
+      const isInput = activeEl?.tagName === 'INPUT' || activeEl?.tagName === 'TEXTAREA' || activeEl?.getAttribute('contenteditable') === 'true';
+
+      if (cmdOrCtrl) {
+        if (e.key.toLowerCase() === 's') {
+          e.preventDefault();
+          handleSaveDraft(`Draft ${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`, state);
+        } else if (e.key.toLowerCase() === 'z') {
+          if (!isInput) {
+            e.preventDefault();
+            if (e.shiftKey) {
+              handleRedo();
+            } else {
+              handleUndo();
+            }
+          }
+        } else if (e.key.toLowerCase() === 'y' && !isMac) {
+          if (!isInput) {
+            e.preventDefault();
+            handleRedo();
+          }
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [state, past, future]);
 
   const handleRandomize = () => {
     handleSaveToHistory(state);
@@ -323,7 +383,7 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-[var(--root-bg)] text-[var(--root-fg)] font-sans selection:bg-blue-500/30 flex flex-col h-screen overflow-hidden relative transition-colors duration-300">
+    <div className="min-h-screen bg-[var(--root-bg)] text-[var(--root-fg)] font-sans selection:bg-blue-500/30 flex flex-col md:h-screen md:overflow-hidden relative transition-colors duration-300">
       
       {/* Background Ambient Glows */}
       <div className="absolute top-[-10%] left-[-5%] w-[55%] h-[55%] rounded-full bg-glow-blob-1 pointer-events-none z-0"></div>
@@ -343,24 +403,16 @@ export default function App() {
       />
 
       {/* Main Workspace Area */}
-      <div className="flex-1 flex flex-col h-full overflow-hidden z-10 min-w-0">
+      <div className="flex-1 flex flex-col md:h-full md:overflow-hidden z-10 min-w-0">
         
         {/* Workspace Panels (Properties & Canvas) */}
-        <main className="flex-1 flex flex-col p-4 lg:p-6 gap-6 w-full mx-auto overflow-hidden h-full min-h-0">
-          
-          {/* Platform selector strictly for mobile layouts */}
-          <div className="lg:hidden shrink-0">
-            <PlatformSelector 
-              platform={state.platform} 
-              onChange={(platform) => handleStateChange({ platform })} 
-            />
-          </div>
+        <main className="flex-1 flex flex-col p-4 md:p-6 gap-6 w-full mx-auto md:overflow-hidden md:h-full min-h-0">
           
           {/* Split view panels */}
-          <div className="flex-1 flex flex-col lg:flex-row gap-4 lg:gap-6 items-stretch min-h-0 overflow-hidden relative">
+          <div className="flex-1 flex flex-col md:flex-row gap-4 md:gap-6 items-stretch min-h-0 md:overflow-hidden relative">
             
             {/* Live Preview Area - Order 1 (Top) on Mobile, Order 2 (Right) on PC */}
-            <div className="order-1 lg:order-2 flex flex-col h-[45vh] lg:h-auto lg:flex-1 min-h-[320px] lg:min-h-0 overflow-hidden relative shrink-0 z-20">
+            <div className="order-1 md:order-2 flex flex-col h-[400px] sm:h-[450px] md:h-auto md:flex-1 md:min-h-0 overflow-hidden relative shrink-0 z-20">
                <PreviewArea 
                  state={state} 
                  onStateChange={handleStateChange}
@@ -373,15 +425,16 @@ export default function App() {
                  setEditingItemId={setActiveReplyEditId}
                  isAddingNew={isAddingReply}
                  setIsAddingNew={setIsAddingReply}
+                 onAddSnapshot={handleAddSnapshot}
+                 onRandomize={handleRandomize}
                />
             </div>
 
             {/* Properties Panel - Order 2 (Bottom) on Mobile, Order 1 (Left) on PC */}
-            <div className="order-2 lg:order-1 flex-1 lg:flex-none lg:w-[365px] flex flex-col min-h-0 overflow-hidden z-10">
+            <div className="order-2 md:order-1 w-full md:w-[320px] lg:w-[365px] flex flex-col shrink-0 md:shrink md:min-h-0 md:overflow-hidden z-10">
               <Sidebar 
                 state={state} 
                 onChange={handleStateChange}
-                onRandomize={handleRandomize}
                 onReset={handleReset}
                 isPremium={isPremium}
                 exportCount={exportCount}
@@ -398,6 +451,8 @@ export default function App() {
                 onRedo={handleRedo}
                 canUndo={past.length > 0}
                 canRedo={future.length > 0}
+                snapshots={snapshots}
+                onDeleteSnapshot={handleDeleteSnapshot}
               />
             </div>
             

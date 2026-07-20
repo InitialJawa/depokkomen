@@ -1,13 +1,16 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Mail, Check, LogIn, Chrome, ShieldAlert, Sparkles, User, HelpCircle } from 'lucide-react';
+import { X, Mail, Check, LogIn, Chrome, ShieldAlert, Sparkles, User, HelpCircle, Lock, AlertCircle } from 'lucide-react';
 import { Button } from './ui';
+import { auth } from '../lib/firebase';
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, sendPasswordResetEmail } from 'firebase/auth';
 
 interface UserProfile {
   name: string;
   email: string;
   avatar: string;
   isGuest: boolean;
+  uid?: string;
 }
 
 interface Props {
@@ -19,53 +22,98 @@ interface Props {
 }
 
 export function AuthModal({ isOpen, onClose, onLoginSuccess, currentUser, onLogout }: Props) {
-  const [activeTab, setActiveTab] = useState<'login' | 'register'>('login');
+  const [activeTab, setActiveTab] = useState<'login' | 'register' | 'forgot'>('login');
   const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
 
-  const handleMockOAuth = (provider: 'google' | 'tiktok') => {
+  const handleGoogleLogin = async () => {
     setIsSubmitting(true);
-    setTimeout(() => {
-      setIsSubmitting(false);
-      const mockUser: UserProfile = {
-        name: provider === 'google' ? 'Andi Gunawan' : 'UGC Creator Depok',
-        email: provider === 'google' ? 'andi.gunawan@gmail.com' : 'ugc.depok@tiktok.com',
-        avatar: provider === 'google' 
-          ? 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=120&h=120&q=80'
-          : 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=120&h=120&q=80',
+    setErrorMessage('');
+    try {
+      const provider = new GoogleAuthProvider();
+      const result = await signInWithPopup(auth, provider);
+      
+      const user: UserProfile = {
+        name: result.user.displayName || 'Google User',
+        email: result.user.email || '',
+        avatar: result.user.photoURL || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=120&h=120&q=80',
         isGuest: false,
+        uid: result.user.uid
       };
-      onLoginSuccess(mockUser);
-      setSuccessMessage(`Berhasil masuk menggunakan akun ${provider === 'google' ? 'Google' : 'TikTok'}!`);
+      
+      onLoginSuccess(user);
+      setSuccessMessage('Berhasil masuk dengan Google!');
       setTimeout(() => {
         setSuccessMessage('');
         onClose();
       }, 1500);
-    }, 1500);
+    } catch (error: any) {
+      setErrorMessage(error.message || 'Gagal masuk dengan Google.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  const handleCustomLogin = (e: React.FormEvent) => {
+  const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email) return;
+    if (!email || !password) return;
 
     setIsSubmitting(true);
-    setTimeout(() => {
-      setIsSubmitting(false);
-      const mockUser: UserProfile = {
-        name: name || email.split('@')[0],
-        email: email,
-        avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&h=120&q=80',
+    setErrorMessage('');
+    try {
+      let userCredential;
+      if (activeTab === 'register') {
+        userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      } else {
+        userCredential = await signInWithEmailAndPassword(auth, email, password);
+      }
+      
+      const user: UserProfile = {
+        name: name || userCredential.user.displayName || email.split('@')[0],
+        email: userCredential.user.email || email,
+        avatar: userCredential.user.photoURL || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&h=120&q=80',
         isGuest: false,
+        uid: userCredential.user.uid
       };
-      onLoginSuccess(mockUser);
-      setSuccessMessage('Berhasil masuk ke akun SocialCanvas Anda!');
+      
+      onLoginSuccess(user);
+      setSuccessMessage(activeTab === 'register' ? 'Berhasil mendaftar!' : 'Berhasil masuk!');
       setTimeout(() => {
         setSuccessMessage('');
         onClose();
       }, 1500);
-    }, 1200);
+    } catch (error: any) {
+      setErrorMessage(error.message || 'Terjadi kesalahan otentikasi.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+  
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email) {
+      setErrorMessage('Masukkan email Anda.');
+      return;
+    }
+    
+    setIsSubmitting(true);
+    setErrorMessage('');
+    try {
+      await sendPasswordResetEmail(auth, email);
+      setSuccessMessage('Email reset password telah dikirim. Periksa kotak masuk Anda.');
+      setTimeout(() => {
+        setSuccessMessage('');
+        setActiveTab('login');
+      }, 3000);
+    } catch (error: any) {
+      setErrorMessage(error.message || 'Gagal mengirim email reset password.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleGuestLogin = () => {
@@ -106,7 +154,7 @@ export function AuthModal({ isOpen, onClose, onLoginSuccess, currentUser, onLogo
           initial={{ opacity: 0, scale: 0.9, y: 15 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.9, y: 15 }}
-          className="relative w-full max-w-md bg-[var(--panel-bg)] border border-[var(--panel-border)] shadow-2xl rounded-3xl overflow-hidden z-10 text-[var(--root-fg)] p-6 sm:p-8 flex flex-col gap-5"
+          className="relative w-full max-w-md max-h-full bg-[var(--panel-bg)] border border-[var(--panel-border)] shadow-2xl rounded-3xl overflow-y-auto custom-scrollbar z-10 text-[var(--root-fg)] p-6 sm:p-8 flex flex-col gap-5"
         >
           {/* Close button */}
           <button
@@ -167,6 +215,13 @@ export function AuthModal({ isOpen, onClose, onLoginSuccess, currentUser, onLogo
                   Pilih metode masuk akun Anda untuk mengaktifkan batas ekspor harian.
                 </p>
               </div>
+              
+              {errorMessage && (
+                <div className="p-3 bg-red-500/10 border border-red-500/20 text-red-500 rounded-xl text-[10px] font-bold flex gap-2 items-center">
+                  <AlertCircle className="w-4 h-4 shrink-0" />
+                  <span>{errorMessage}</span>
+                </div>
+              )}
 
               {/* Navigation Tabs */}
               <div className="flex border-b border-[var(--panel-border)]">
@@ -178,7 +233,7 @@ export function AuthModal({ isOpen, onClose, onLoginSuccess, currentUser, onLogo
                       : 'border-transparent text-[var(--text-muted)] hover:text-[var(--root-fg)]'
                   }`}
                 >
-                  Metode Masuk Instan
+                  Masuk
                 </button>
                 <button
                   onClick={() => setActiveTab('register')}
@@ -188,71 +243,24 @@ export function AuthModal({ isOpen, onClose, onLoginSuccess, currentUser, onLogo
                       : 'border-transparent text-[var(--text-muted)] hover:text-[var(--root-fg)]'
                   }`}
                 >
-                  Custom Email
+                  Daftar
+                </button>
+                <button
+                  onClick={() => setActiveTab('forgot')}
+                  className={`flex-1 pb-2.5 text-[10px] sm:text-xs font-bold border-b-2 transition-all ${
+                    activeTab === 'forgot' 
+                      ? 'border-pink-500 text-pink-400' 
+                      : 'border-transparent text-[var(--text-muted)] hover:text-[var(--root-fg)]'
+                  }`}
+                >
+                  Lupa Sandi
                 </button>
               </div>
 
-              {activeTab === 'login' ? (
-                <div className="flex flex-col gap-3">
-                  {/* Google OAuth mock */}
-                  <button
-                    onClick={() => handleMockOAuth('google')}
-                    disabled={isSubmitting}
-                    className="flex items-center justify-between px-4 py-3 bg-[var(--root-bg)] border border-[var(--panel-border)] rounded-xl hover:border-blue-500/50 hover:bg-[var(--button-hover)] transition-all text-xs font-bold cursor-pointer group"
-                  >
-                    <div className="flex items-center gap-2.5">
-                      <Chrome className="w-4 h-4 text-red-500" />
-                      <span>Masuk dengan Google</span>
-                    </div>
-                    <span className="text-[10px] text-[var(--text-muted)] group-hover:text-blue-400 transition-colors">Instant</span>
-                  </button>
-
-                  {/* TikTok OAuth mock */}
-                  <button
-                    onClick={() => handleMockOAuth('tiktok')}
-                    disabled={isSubmitting}
-                    className="flex items-center justify-between px-4 py-3 bg-[var(--root-bg)] border border-[var(--panel-border)] rounded-xl hover:border-pink-500/50 hover:bg-[var(--button-hover)] transition-all text-xs font-bold cursor-pointer group"
-                  >
-                    <div className="flex items-center gap-2.5">
-                      <LogIn className="w-4 h-4 text-pink-500" />
-                      <span>Masuk dengan TikTok</span>
-                    </div>
-                    <span className="text-[10px] text-[var(--text-muted)] group-hover:text-pink-400 transition-colors">UGC Link</span>
-                  </button>
-
-                  <div className="relative my-1">
-                    <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-[var(--panel-border)]"></div></div>
-                    <div className="relative flex justify-center text-[10px] uppercase font-bold"><span className="bg-[var(--panel-bg)] px-2 text-[var(--text-muted)]">Atau</span></div>
-                  </div>
-
-                  {/* Guest Login */}
-                  <button
-                    onClick={handleGuestLogin}
-                    disabled={isSubmitting}
-                    className="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-blue-500/5 to-indigo-500/5 border border-blue-500/10 rounded-xl hover:border-blue-500/30 hover:bg-blue-500/10 transition-all text-xs font-bold cursor-pointer group"
-                  >
-                    <div className="flex items-center gap-2.5">
-                      <HelpCircle className="w-4 h-4 text-blue-400" />
-                      <div className="text-left">
-                        <div>Gunakan Akun Tamu (Guest)</div>
-                        <div className="text-[10px] text-[var(--text-muted)] font-normal mt-0.5">Bagus untuk uji coba instan cepat</div>
-                      </div>
-                    </div>
-                    <span className="text-[10px] text-blue-400">Gratis</span>
-                  </button>
-                </div>
-              ) : (
-                <form onSubmit={handleCustomLogin} className="flex flex-col gap-4">
-                  <div>
-                    <label className="block text-[10px] uppercase font-bold text-[var(--text-muted)] mb-1">Nama Kreator</label>
-                    <input
-                      type="text"
-                      required
-                      placeholder="Contoh: Andi Wijaya"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      className="w-full bg-[var(--root-bg)] border border-[var(--panel-border)] rounded-xl px-3 py-2.5 text-xs outline-none focus:border-blue-500 text-[var(--root-fg)]"
-                    />
+              {activeTab === 'forgot' ? (
+                <form onSubmit={handleForgotPassword} className="flex flex-col gap-4">
+                  <div className="text-xs text-[var(--text-muted)] mb-2">
+                    Masukkan email akun Anda. Kami akan mengirimkan tautan untuk menyetel ulang kata sandi.
                   </div>
                   <div>
                     <label className="block text-[10px] uppercase font-bold text-[var(--text-muted)] mb-1">Alamat Email</label>
@@ -269,15 +277,92 @@ export function AuthModal({ isOpen, onClose, onLoginSuccess, currentUser, onLogo
                     type="submit"
                     variant="primary"
                     disabled={isSubmitting || !email}
+                    className="w-full h-11 bg-pink-600 hover:bg-pink-700 text-sm font-bold gap-2 rounded-xl mt-1"
+                  >
+                    {isSubmitting ? 'Mengirim...' : 'Kirim Link Reset'}
+                  </Button>
+                </form>
+              ) : (
+                <form onSubmit={handleEmailAuth} className="flex flex-col gap-4">
+                  {activeTab === 'register' && (
+                    <div>
+                      <label className="block text-[10px] uppercase font-bold text-[var(--text-muted)] mb-1">Nama Kreator</label>
+                      <input
+                        type="text"
+                        required
+                        placeholder="Contoh: Andi Wijaya"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        className="w-full bg-[var(--root-bg)] border border-[var(--panel-border)] rounded-xl px-3 py-2.5 text-xs outline-none focus:border-blue-500 text-[var(--root-fg)]"
+                      />
+                    </div>
+                  )}
+                  <div>
+                    <label className="block text-[10px] uppercase font-bold text-[var(--text-muted)] mb-1">Alamat Email</label>
+                    <input
+                      type="email"
+                      required
+                      placeholder="nama@email.com"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="w-full bg-[var(--root-bg)] border border-[var(--panel-border)] rounded-xl px-3 py-2.5 text-xs outline-none focus:border-blue-500 text-[var(--root-fg)]"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] uppercase font-bold text-[var(--text-muted)] mb-1">Kata Sandi</label>
+                    <input
+                      type="password"
+                      required
+                      placeholder="Minimal 6 karakter"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="w-full bg-[var(--root-bg)] border border-[var(--panel-border)] rounded-xl px-3 py-2.5 text-xs outline-none focus:border-blue-500 text-[var(--root-fg)]"
+                    />
+                  </div>
+                  <Button
+                    type="submit"
+                    variant="primary"
+                    disabled={isSubmitting || !email || !password}
                     className="w-full h-11 bg-blue-600 hover:bg-blue-700 text-sm font-bold gap-2 rounded-xl mt-1"
                   >
-                    {isSubmitting ? 'Mendaftarkan Akun...' : 'Daftar & Mulai Sekarang'}
+                    {isSubmitting ? 'Memproses...' : (activeTab === 'register' ? 'Daftar Sekarang' : 'Masuk Akun')}
                   </Button>
                 </form>
               )}
+              
+              <div className="relative my-1">
+                <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-[var(--panel-border)]"></div></div>
+                <div className="relative flex justify-center text-[10px] uppercase font-bold"><span className="bg-[var(--panel-bg)] px-2 text-[var(--text-muted)]">Atau</span></div>
+              </div>
+              
+              <div className="flex flex-col gap-2.5">
+                {/* Google OAuth */}
+                <button
+                  onClick={handleGoogleLogin}
+                  disabled={isSubmitting}
+                  className="flex items-center justify-between px-4 py-3 bg-[var(--root-bg)] border border-[var(--panel-border)] rounded-xl hover:border-blue-500/50 hover:bg-[var(--button-hover)] transition-all text-xs font-bold cursor-pointer group"
+                >
+                  <div className="flex items-center gap-2.5">
+                    <Chrome className="w-4 h-4 text-blue-500" />
+                    <span>Masuk dengan Google</span>
+                  </div>
+                </button>
+
+                {/* Guest Login */}
+                <button
+                  onClick={handleGuestLogin}
+                  disabled={isSubmitting}
+                  className="flex items-center justify-between px-4 py-3 bg-[var(--root-bg)] border border-[var(--panel-border)] rounded-xl hover:border-blue-500/50 hover:bg-[var(--button-hover)] transition-all text-xs font-bold cursor-pointer group"
+                >
+                  <div className="flex items-center gap-2.5">
+                    <HelpCircle className="w-4 h-4 text-slate-400" />
+                    <span>Lanjutkan sebagai Tamu</span>
+                  </div>
+                </button>
+              </div>
 
               <p className="text-[10px] text-center text-[var(--text-muted)] leading-relaxed">
-                Dengan masuk akun, Anda menyetujui Ketentuan Layanan SocialCanvas. Batas ekspor harian Free adalah 30 screenshot komentar per hari.
+                Penting: Pastikan Anda telah mengaktifkan <b>Email/Password provider</b> di Firebase Console Anda jika fitur pendaftaran gagal.
               </p>
             </div>
           )}
@@ -286,3 +371,4 @@ export function AuthModal({ isOpen, onClose, onLoginSuccess, currentUser, onLogo
     </AnimatePresence>
   );
 }
+

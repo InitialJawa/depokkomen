@@ -27,46 +27,42 @@ export function SectionAppearance({ state, onChange }: Props) {
         </Select>
       </div>
 
-      <div>
-        <div className="flex justify-between items-center mb-2">
-          <Label className="mb-0">Font Size</Label>
-          <span className="text-xs font-mono bg-[var(--root-bg)] border border-[var(--panel-border)] px-2 py-0.5 rounded text-[var(--text-muted)]">{state.fontSize || 15}px</span>
+      <div className="flex flex-col gap-3">
+        <div className="flex items-center gap-3">
+          <Label className="mb-0 w-24 text-[10px]">Font Size</Label>
+          <input 
+            type="range" 
+            min="12" max="24" step="1"
+            value={state.fontSize || 15}
+            onChange={e => onChange({ fontSize: parseInt(e.target.value) })}
+            className="flex-1 accent-blue-500 h-1.5"
+          />
+          <span className="text-[10px] font-mono text-[var(--text-muted)] w-8 text-right">{state.fontSize || 15}px</span>
         </div>
-        <input 
-          type="range" 
-          min="12" max="24" step="1"
-          value={state.fontSize || 15}
-          onChange={e => onChange({ fontSize: parseInt(e.target.value) })}
-          className="w-full accent-blue-500"
-        />
-      </div>
 
-      <div>
-        <div className="flex justify-between items-center mb-2">
-          <Label className="mb-0">Padding</Label>
-          <span className="text-xs font-mono bg-[var(--root-bg)] border border-[var(--panel-border)] px-2 py-0.5 rounded text-[var(--text-muted)]">{state.padding ?? 16}px</span>
+        <div className="flex items-center gap-3">
+          <Label className="mb-0 w-24 text-[10px]">Padding</Label>
+          <input 
+            type="range" 
+            min="8" max="32" step="1"
+            value={state.padding ?? 16}
+            onChange={e => onChange({ padding: parseInt(e.target.value) })}
+            className="flex-1 accent-blue-500 h-1.5"
+          />
+          <span className="text-[10px] font-mono text-[var(--text-muted)] w-8 text-right">{state.padding ?? 16}px</span>
         </div>
-        <input 
-          type="range" 
-          min="8" max="32" step="1"
-          value={state.padding ?? 16}
-          onChange={e => onChange({ padding: parseInt(e.target.value) })}
-          className="w-full accent-blue-500"
-        />
-      </div>
 
-      <div>
-        <div className="flex justify-between items-center mb-2">
-          <Label className="mb-0">Border Radius</Label>
-          <span className="text-xs font-mono bg-[var(--root-bg)] border border-[var(--panel-border)] px-2 py-0.5 rounded text-[var(--text-muted)]">{state.borderRadius ?? 12}px</span>
+        <div className="flex items-center gap-3">
+          <Label className="mb-0 w-24 text-[10px]">Border Radius</Label>
+          <input 
+            type="range" 
+            min="0" max="48" step="1"
+            value={state.borderRadius ?? 12}
+            onChange={e => onChange({ borderRadius: parseInt(e.target.value) })}
+            className="flex-1 accent-blue-500 h-1.5"
+          />
+          <span className="text-[10px] font-mono text-[var(--text-muted)] w-8 text-right">{state.borderRadius ?? 12}px</span>
         </div>
-        <input 
-          type="range" 
-          min="0" max="48" step="1"
-          value={state.borderRadius ?? 12}
-          onChange={e => onChange({ borderRadius: parseInt(e.target.value) })}
-          className="w-full accent-blue-500"
-        />
       </div>
 
       <div>

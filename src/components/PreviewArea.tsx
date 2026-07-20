@@ -17,7 +17,7 @@ import {
   KickColoredIcon 
 } from './icons';
 import { motion, useMotionValue } from 'motion/react';
-import { Sun, Moon, X, Trash2, Shuffle, Check, MessageSquare, Highlighter, EyeOff, Scissors, RotateCcw } from 'lucide-react';
+import { Sun, Moon, X, Trash2, Shuffle, Check, MessageSquare, Highlighter, EyeOff, Scissors, RotateCcw, Image } from 'lucide-react';
 import { maleUsernames, femaleUsernames, getRandomAvatarUrl } from '../utils';
 
 interface Props {
@@ -32,6 +32,8 @@ interface Props {
   setEditingItemId?: (id: string | null) => void;
   isAddingNew?: boolean;
   setIsAddingNew?: (adding: boolean) => void;
+  onAddSnapshot?: (url: string) => void;
+  onRandomize?: () => void;
 }
 
 export function PreviewArea({ 
@@ -45,7 +47,9 @@ export function PreviewArea({
   editingItemId: propEditingItemId,
   setEditingItemId: propSetEditingItemId,
   isAddingNew: propIsAddingNew,
-  setIsAddingNew: propSetIsAddingNew
+  setIsAddingNew: propSetIsAddingNew,
+  onAddSnapshot,
+  onRandomize
 }: Props) {
   const previewRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -112,6 +116,28 @@ export function PreviewArea({
       alert('Gagal mengekspor gambar.');
     } finally {
       setIsExporting(false);
+    }
+  };
+
+  const handleSnapshot = async () => {
+    if (!previewRef.current || !onAddSnapshot) return;
+    try {
+      const originalTransform = previewRef.current.style.transform;
+      previewRef.current.style.transform = `scale(1) translate(0px, 0px)`;
+      await new Promise(r => setTimeout(r, 100)); // wait for dom to update
+      
+      const options = {
+        cacheBust: true,
+        pixelRatio: 1,
+        backgroundColor: state.theme === 'dark' ? '#000000' : '#ffffff',
+        style: { margin: '0' }
+      };
+
+      const dataUrl = await toPng(previewRef.current, options);
+      onAddSnapshot(dataUrl);
+      previewRef.current.style.transform = originalTransform;
+    } catch (err) {
+      console.error('Failed to create snapshot', err);
     }
   };
 
@@ -364,16 +390,37 @@ export function PreviewArea({
         onCardThemeChange={(theme) => onStateChange({ theme })}
       />
 
-      <ExportCard 
-        onExport={handleExport} 
-        isExporting={isExporting} 
-        isPremium={isPremium}
-        exportCount={exportCount}
-        onUpgradeClick={onUpgradeClick}
-      />
+      {/* Action Buttons: Randomize, Snapshot, and Export */}
+      <div className="absolute top-4 right-4 z-30 flex items-center gap-2">
+        <button
+          onClick={onRandomize}
+          className="flex items-center gap-1.5 px-3 py-2 bg-[var(--panel-bg)]/90 backdrop-blur-md border border-[var(--panel-border)] hover:border-blue-500/50 hover:bg-[var(--button-hover)] text-[var(--root-fg)] font-semibold text-xs rounded-xl shadow-md transition-all cursor-pointer select-none"
+          title="Randomize Content"
+        >
+          <Shuffle className="w-3.5 h-3.5 text-blue-500" />
+          <span className="hidden sm:inline">Randomize</span>
+        </button>
 
-      {/* Floating Platform Dock (Centered at the top to prevent any collision) */}
-      <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 flex bg-[var(--panel-bg)]/85 backdrop-blur-md border border-[var(--panel-border)] rounded-xl p-1 shadow-lg items-center gap-1">
+        <button
+          onClick={handleSnapshot}
+          className="flex items-center gap-1.5 px-3 py-2 bg-[var(--panel-bg)]/90 backdrop-blur-md border border-[var(--panel-border)] hover:border-emerald-500/50 hover:bg-[var(--button-hover)] text-[var(--root-fg)] font-semibold text-xs rounded-xl shadow-md transition-all cursor-pointer select-none"
+          title="Quick Snapshot for Side-by-Side Comparison"
+        >
+          <Image className="w-3.5 h-3.5 text-emerald-500" />
+          <span className="hidden sm:inline">Snapshot</span>
+        </button>
+        
+        <ExportCard 
+          onExport={handleExport} 
+          isExporting={isExporting} 
+          isPremium={isPremium}
+          exportCount={exportCount}
+          onUpgradeClick={onUpgradeClick}
+        />
+      </div>
+
+      {/* Floating Platform Dock */}
+      <div className="absolute top-4 left-4 z-20 flex bg-[var(--panel-bg)]/85 backdrop-blur-md border border-[var(--panel-border)] rounded-xl p-1 shadow-lg items-center gap-1">
          {platforms.map((p) => {
            const isActive = state.platform === p.id;
            return (
@@ -446,97 +493,95 @@ export function PreviewArea({
 
         {/* Beautiful Floating Inline Editor Modal for Nest Replies / Live Comments */}
         {(isAddingNew || editingItemId) && (
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-2 sm:p-4">
             <motion.div 
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
-              className="w-full max-w-md bg-zinc-900/95 border border-zinc-800 text-white rounded-2xl shadow-2xl overflow-hidden backdrop-blur-xl"
+              className="w-full max-w-md max-h-full flex flex-col bg-zinc-900/95 border border-zinc-800 text-white rounded-xl sm:rounded-2xl shadow-2xl overflow-hidden backdrop-blur-xl"
             >
               {/* Header */}
-              <div className="flex items-center justify-between p-4.5 border-b border-zinc-800 bg-zinc-950/45">
+              <div className="flex items-center justify-between p-2.5 sm:p-3.5 border-b border-zinc-800 bg-zinc-950/45 shrink-0">
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-lg bg-pink-500/10 flex items-center justify-center text-pink-400">
-                    <MessageSquare className="w-4 h-4" />
+                  <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-pink-500/10 flex items-center justify-center text-pink-400">
+                    <MessageSquare className="w-3.5 h-3.5" />
                   </div>
-                  <h3 className="font-semibold text-sm">
-                    {isAddingNew ? 'Tambah Balasan Baru' : 'Edit Balasan / Komentar'}
+                  <h3 className="font-semibold text-xs sm:text-sm">
+                    {isAddingNew ? 'Balasan Baru' : 'Edit Balasan'}
                   </h3>
+                  <button
+                    type="button"
+                    onClick={handleRandomizeProfile}
+                    title="Acak Profil"
+                    className="ml-1 sm:ml-2 w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center bg-blue-500/10 text-blue-400 rounded-md hover:bg-blue-500/20 transition-colors"
+                  >
+                    <Shuffle className="w-3 h-3" />
+                  </button>
                 </div>
                 <button 
                   onClick={() => { setIsAddingNew(false); setEditingItemId(null); }}
-                  className="p-1 hover:bg-zinc-800 rounded-md transition text-zinc-400 hover:text-white cursor-pointer"
+                  className="p-1 sm:p-1.5 hover:bg-zinc-800 rounded-md transition text-zinc-400 hover:text-white cursor-pointer"
                 >
                   <X className="w-4 h-4" />
                 </button>
               </div>
 
               {/* Body */}
-              <div className="p-5 flex flex-col gap-4 max-h-[70vh] overflow-y-auto custom-scrollbar">
-                {/* Randomize profile button */}
-                <button
-                  type="button"
-                  onClick={handleRandomizeProfile}
-                  className="flex items-center justify-center gap-2 py-2 px-4 rounded-xl border border-zinc-800 hover:border-zinc-700 bg-zinc-800/35 hover:bg-zinc-800/80 text-xs font-semibold text-blue-400 transition-all cursor-pointer self-start"
-                >
-                  <Shuffle className="w-3.5 h-3.5" />
-                  Acak Profil Pembalas
-                </button>
-
+              <div className="p-3 sm:p-4 flex flex-col gap-2.5 sm:gap-3 flex-1 overflow-y-auto custom-scrollbar">
                 {/* Profile row */}
-                <div className="grid grid-cols-2 gap-3.5">
-                  <div className="flex flex-col gap-1.5">
-                    <label className="text-[11px] font-bold uppercase tracking-wider text-zinc-400">Username</label>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="flex flex-col gap-1">
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Username</label>
                     <input 
                       type="text" 
                       value={modalUsername} 
                       onChange={(e) => setModalUsername(e.target.value)}
                       placeholder="username"
-                      className="w-full text-xs py-2 px-3 rounded-lg bg-zinc-950 border border-zinc-800 focus:border-zinc-600 outline-none transition text-white"
+                      className="w-full text-xs py-1.5 px-2.5 rounded bg-zinc-950 border border-zinc-800 focus:border-zinc-600 outline-none transition text-white"
                     />
                   </div>
                   {!(state.platform === 'kick_live' || (state.platform === 'instagram' && state.instagramTemplate === 'live')) && (
-                    <div className="flex flex-col gap-1.5">
-                      <label className="text-[11px] font-bold uppercase tracking-wider text-zinc-400">Handle / Tag</label>
+                    <div className="flex flex-col gap-1">
+                      <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Handle / Tag</label>
                       <input 
                         type="text" 
                         value={modalHandle} 
                         onChange={(e) => setModalHandle(e.target.value)}
                         placeholder="@handle"
-                        className="w-full text-xs py-2 px-3 rounded-lg bg-zinc-950 border border-zinc-800 focus:border-zinc-600 outline-none transition text-white"
+                        className="w-full text-xs py-1.5 px-2.5 rounded bg-zinc-950 border border-zinc-800 focus:border-zinc-600 outline-none transition text-white"
                       />
                     </div>
                   )}
                 </div>
 
                 {/* Avatar URL input */}
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-[11px] font-bold uppercase tracking-wider text-zinc-400">Avatar URL</label>
+                <div className="flex flex-col gap-1">
+                  <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Avatar URL</label>
                   <div className="flex gap-2 items-center">
                     {modalAvatar && (
-                      <img src={modalAvatar} alt="preview" className="w-8 h-8 rounded-full border border-zinc-800 object-cover bg-zinc-950 shrink-0" />
+                      <img src={modalAvatar} alt="preview" className="w-7 h-7 rounded-full border border-zinc-800 object-cover bg-zinc-950 shrink-0" />
                     )}
                     <input 
                       type="text" 
                       value={modalAvatar} 
                       onChange={(e) => setModalAvatar(e.target.value)}
                       placeholder="https://..."
-                      className="w-full text-xs py-2 px-3 rounded-lg bg-zinc-950 border border-zinc-800 focus:border-zinc-600 outline-none transition text-white"
+                      className="w-full text-xs py-1.5 px-2.5 rounded bg-zinc-950 border border-zinc-800 focus:border-zinc-600 outline-none transition text-white"
                     />
                   </div>
                 </div>
 
                 {/* Comment Textarea with emoji selection and styling toolbar */}
-                <div className="flex flex-col gap-1.5">
+                <div className="flex flex-col gap-1">
                   <div className="flex justify-between items-center mb-0.5">
-                    <label className="text-[11px] font-bold uppercase tracking-wider text-zinc-400">Isi Balasan / Komentar</label>
-                    <div className="flex gap-1 bg-zinc-950 p-0.5 rounded border border-zinc-800/80">
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Isi Balasan</label>
+                    <div className="flex gap-0.5 bg-zinc-950 p-0.5 rounded border border-zinc-800/80">
                       {['👍', '❤️', '😂', '🔥', '😭'].map(emoji => (
                         <button 
                           key={emoji}
                           type="button"
                           onClick={() => setModalText(modalText + emoji)}
-                          className="text-xs hover:bg-zinc-800 w-5.5 h-5.5 rounded flex items-center justify-center transition cursor-pointer"
+                          className="text-xs hover:bg-zinc-800 w-5 h-5 rounded flex items-center justify-center transition cursor-pointer"
                         >
                           {emoji}
                         </button>
@@ -547,116 +592,116 @@ export function PreviewArea({
                     ref={modalTextareaRef}
                     value={modalText} 
                     onChange={(e) => setModalText(e.target.value)}
-                    placeholder="Tulis balasan Anda di sini..."
-                    rows={3}
-                    className="w-full text-xs py-2 px-3 rounded-lg bg-zinc-950 border border-zinc-800 focus:border-zinc-600 outline-none transition text-white resize-none"
+                    placeholder="Tulis balasan..."
+                    rows={2}
+                    className="w-full text-xs py-2 px-2.5 rounded bg-zinc-950 border border-zinc-800 focus:border-zinc-600 outline-none transition text-white resize-none"
                     autoFocus
                   />
                   
                   {/* Advanced Formatting Toolbar inside modal */}
-                  <div className="flex items-center justify-between bg-zinc-950 border border-zinc-800 rounded-lg p-1">
+                  <div className="flex items-center justify-between bg-zinc-950 border border-zinc-800 rounded p-1 mt-1">
                     <div className="flex gap-1">
                       <button 
                         title="Highlight" 
                         type="button" 
                         onMouseDown={(e) => { e.preventDefault(); applyModalFormat('highlight'); }} 
-                        className="w-8 h-8 rounded-md hover:bg-zinc-800 flex items-center justify-center text-zinc-400 hover:text-yellow-500 transition cursor-pointer"
+                        className="w-6 h-6 rounded hover:bg-zinc-800 flex items-center justify-center text-zinc-400 hover:text-yellow-500 transition cursor-pointer"
                       >
-                        <Highlighter className="w-4 h-4" />
+                        <Highlighter className="w-3.5 h-3.5" />
                       </button>
                       <button 
                         title="Blur" 
                         type="button" 
                         onMouseDown={(e) => { e.preventDefault(); applyModalFormat('blur'); }} 
-                        className="w-8 h-8 rounded-md hover:bg-zinc-800 flex items-center justify-center text-zinc-400 hover:text-blue-500 transition cursor-pointer"
+                        className="w-6 h-6 rounded hover:bg-zinc-800 flex items-center justify-center text-zinc-400 hover:text-blue-500 transition cursor-pointer"
                       >
-                        <EyeOff className="w-4 h-4" />
+                        <EyeOff className="w-3.5 h-3.5" />
                       </button>
                       <button 
                         title="Cut" 
                         type="button" 
                         onMouseDown={(e) => { e.preventDefault(); applyModalFormat('cut'); }} 
-                        className="w-8 h-8 rounded-md hover:bg-zinc-800 flex items-center justify-center text-zinc-400 hover:text-red-500 transition cursor-pointer"
+                        className="w-6 h-6 rounded hover:bg-zinc-800 flex items-center justify-center text-zinc-400 hover:text-red-500 transition cursor-pointer"
                       >
-                        <Scissors className="w-4 h-4" />
+                        <Scissors className="w-3.5 h-3.5" />
                       </button>
                     </div>
-                    <div className="w-[1px] h-4 bg-zinc-800 mx-1" />
+                    <div className="w-[1px] h-3 bg-zinc-800 mx-1" />
                     <button 
                       title="Reset Formatting" 
                       type="button" 
                       onClick={resetModalFormat} 
-                      className="w-8 h-8 rounded-md hover:bg-zinc-800 flex items-center justify-center text-zinc-400 hover:text-white transition cursor-pointer"
+                      className="w-6 h-6 rounded hover:bg-zinc-800 flex items-center justify-center text-zinc-400 hover:text-white transition cursor-pointer"
                     >
-                      <RotateCcw className="w-4 h-4" />
+                      <RotateCcw className="w-3.5 h-3.5" />
                     </button>
                   </div>
                 </div>
 
                 {/* Optional items for normal comment templates only */}
                 {!(state.platform === 'kick_live' || (state.platform === 'instagram' && state.instagramTemplate === 'live')) && (
-                  <div className="grid grid-cols-2 gap-3.5">
-                    <div className="flex flex-col gap-1.5">
-                      <label className="text-[11px] font-bold uppercase tracking-wider text-zinc-400">Waktu / Timestamp</label>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="flex flex-col gap-1">
+                      <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Timestamp</label>
                       <input 
                         type="text" 
                         value={modalTimestamp} 
                         onChange={(e) => setModalTimestamp(e.target.value)}
                         placeholder="1j lalu"
-                        className="w-full text-xs py-2 px-3 rounded-lg bg-zinc-950 border border-zinc-800 focus:border-zinc-600 outline-none transition text-white"
+                        className="w-full text-xs py-1.5 px-2.5 rounded bg-zinc-950 border border-zinc-800 focus:border-zinc-600 outline-none transition text-white"
                       />
                     </div>
-                    <div className="flex flex-col gap-1.5">
-                      <label className="text-[11px] font-bold uppercase tracking-wider text-zinc-400">Jumlah Likes</label>
+                    <div className="flex flex-col gap-1">
+                      <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Likes</label>
                       <input 
                         type="text" 
                         value={modalLikes} 
                         onChange={(e) => setModalLikes(e.target.value)}
                         placeholder="2.4K"
-                        className="w-full text-xs py-2 px-3 rounded-lg bg-zinc-950 border border-zinc-800 focus:border-zinc-600 outline-none transition text-white"
+                        className="w-full text-xs py-1.5 px-2.5 rounded bg-zinc-950 border border-zinc-800 focus:border-zinc-600 outline-none transition text-white"
                       />
                     </div>
                   </div>
                 )}
 
                 {/* Switches / Checkboxes */}
-                <div className="flex flex-wrap gap-4 bg-zinc-950/50 p-3 rounded-xl border border-zinc-800/80">
-                  <label className="flex items-center gap-2 cursor-pointer select-none text-xs text-zinc-300 hover:text-white">
+                <div className="flex flex-wrap gap-2.5 bg-zinc-950/50 p-2.5 rounded border border-zinc-800/80">
+                  <label className="flex items-center gap-1.5 cursor-pointer select-none text-[11px] text-zinc-300 hover:text-white">
                     <input 
                       type="checkbox" 
                       checked={modalVerified} 
                       onChange={(e) => setModalVerified(e.target.checked)}
-                      className="rounded border-zinc-800 bg-zinc-950 text-blue-500 focus:ring-0 cursor-pointer"
+                      className="rounded border-zinc-800 bg-zinc-950 w-3.5 h-3.5 text-blue-500 focus:ring-0 cursor-pointer"
                     />
-                    <span>Verified Badge</span>
+                    <span>Verified</span>
                   </label>
 
                   {!(state.platform === 'kick_live' || (state.platform === 'instagram' && state.instagramTemplate === 'live')) && (
-                    <label className="flex items-center gap-2 cursor-pointer select-none text-xs text-zinc-300 hover:text-white">
+                    <label className="flex items-center gap-1.5 cursor-pointer select-none text-[11px] text-zinc-300 hover:text-white">
                       <input 
                         type="checkbox" 
                         checked={modalCreatorLiked} 
                         onChange={(e) => setModalCreatorLiked(e.target.checked)}
-                        className="rounded border-zinc-800 bg-zinc-950 text-blue-500 focus:ring-0 cursor-pointer"
+                        className="rounded border-zinc-800 bg-zinc-950 w-3.5 h-3.5 text-blue-500 focus:ring-0 cursor-pointer"
                       />
-                      <span>Disukai Kreator</span>
+                      <span>Liked</span>
                     </label>
                   )}
 
-                  <label className="flex items-center gap-2 cursor-pointer select-none text-xs text-zinc-300 hover:text-white">
+                  <label className="flex items-center gap-1.5 cursor-pointer select-none text-[11px] text-zinc-300 hover:text-white">
                     <input 
                       type="checkbox" 
                       checked={modalPinned} 
                       onChange={(e) => setModalPinned(e.target.checked)}
-                      className="rounded border-zinc-800 bg-zinc-950 text-blue-500 focus:ring-0 cursor-pointer"
+                      className="rounded border-zinc-800 bg-zinc-950 w-3.5 h-3.5 text-blue-500 focus:ring-0 cursor-pointer"
                     />
-                    <span>Pinned Comment</span>
+                    <span>Pinned</span>
                   </label>
                 </div>
               </div>
 
               {/* Footer */}
-              <div className="flex items-center justify-between p-4 border-t border-zinc-800 bg-zinc-950/45 gap-3">
+              <div className="flex items-center justify-between p-3 border-t border-zinc-800 bg-zinc-950/45 gap-2 shrink-0">
                 <div>
                   {!isAddingNew && (
                     <button
