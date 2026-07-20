@@ -107,15 +107,6 @@ export function Sidebar({
     });
   };
 
-  const handleQuickSave = () => {
-    const formattedDate = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
-    const defaultName = `Draf ${state.platform.toUpperCase()} - ${formattedDate}`;
-    const name = window.prompt('Masukkan nama draf Anda:', defaultName);
-    if (name !== null) {
-      onSaveDraft(name.trim() || defaultName, state);
-    }
-  };
-
   const presets = [
     { icon: "🔥", category: "Viral", label: "Kawal FYP", text: "Kawal sampai tembus fyp 🔥🚀" },
     { icon: "😂", category: "Funny", label: "Relate", text: "Agak laen emang, tapi relate banget woy 😭😭" },
@@ -125,25 +116,6 @@ export function Sidebar({
 
   return (
     <div className="flex flex-col md:h-full glass-panel rounded-2xl md:overflow-hidden w-full md:w-[320px] lg:w-[365px] shrink-0 shadow-lg">
-      <div className="p-4 border-b border-[var(--panel-border)] flex items-center justify-between bg-[var(--panel-bg-translucent)] backdrop-blur-md z-10 shrink-0">
-        <h2 className="text-xs font-bold uppercase tracking-wider text-[var(--root-fg)] opacity-90">Properties</h2>
-        <div className="flex items-center gap-1.5">
-          <Button 
-            variant="ghost" 
-            onClick={handleQuickSave} 
-            title="Simpan Draf Cepat" 
-            className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-[var(--button-hover)] text-blue-500 hover:text-blue-400 transition-all cursor-pointer"
-          >
-            <FolderHeart className="w-4 h-4" />
-          </Button>
-          {onReset && (
-            <Button variant="ghost" onClick={onReset} title="Reset" className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-[var(--button-hover)] transition-all cursor-pointer">
-              <RotateCcw className="w-3.5 h-3.5 text-[var(--root-fg)]" />
-            </Button>
-          )}
-        </div>
-      </div>
-      
       {/* Scrollable area for properties */}
       <div className="md:flex-1 md:overflow-y-auto custom-scrollbar flex flex-col">
         {/* TAB NAVIGATION */}

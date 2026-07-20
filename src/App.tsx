@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Header } from './components/Header';
 import { PlatformSelector } from './components/PlatformSelector';
 import { Sidebar } from './components/Sidebar';
@@ -111,6 +111,12 @@ export default function App() {
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [activeReplyEditId, setActiveReplyEditId] = useState<string | null>(null);
   const [isAddingReply, setIsAddingReply] = useState(false);
+  
+  // Mobile Resizable Preview State
+  const [mobilePreviewHeight, setMobilePreviewHeight] = useState(400);
+  const dragStartY = useRef(0);
+  const dragStartHeight = useRef(0);
+  const [isDraggingHeight, setIsDraggingHeight] = useState(false);
 
   // Drafts & History State & Actions
   const [drafts, setDrafts] = useState<DraftItem[]>(() => {
@@ -343,6 +349,47 @@ export default function App() {
     { id: 'kick_live', label: 'Kick Live', icon: <KickColoredIcon className="w-5 h-5" /> },
   ];
 
+  const handleTouchStart = useCallback((e: React.TouchEvent | React.MouseEvent) => {
+    setIsDraggingHeight(true);
+    const clientY = 'touches' in e ? (e as React.TouchEvent).touches[0].clientY : (e as React.MouseEvent).clientY;
+    dragStartY.current = clientY;
+    dragStartHeight.current = mobilePreviewHeight;
+  }, [mobilePreviewHeight]);
+
+  const handleTouchMove = useCallback((e: TouchEvent | MouseEvent) => {
+    if (!isDraggingHeight) return;
+    const clientY = 'touches' in e ? (e as TouchEvent).touches[0].clientY : (e as MouseEvent).clientY;
+    const deltaY = clientY - dragStartY.current;
+    
+    // Calculate new height, constrain between 300px and 80vh
+    const newHeight = Math.max(300, Math.min(window.innerHeight * 0.8, dragStartHeight.current + deltaY));
+    setMobilePreviewHeight(newHeight);
+  }, [isDraggingHeight]);
+
+  const handleTouchEnd = useCallback(() => {
+    setIsDraggingHeight(false);
+  }, []);
+
+  useEffect(() => {
+    if (isDraggingHeight) {
+      window.addEventListener('mousemove', handleTouchMove);
+      window.addEventListener('mouseup', handleTouchEnd);
+      window.addEventListener('touchmove', handleTouchMove, { passive: false });
+      window.addEventListener('touchend', handleTouchEnd);
+    } else {
+      window.removeEventListener('mousemove', handleTouchMove);
+      window.removeEventListener('mouseup', handleTouchEnd);
+      window.removeEventListener('touchmove', handleTouchMove);
+      window.removeEventListener('touchend', handleTouchEnd);
+    }
+    return () => {
+      window.removeEventListener('mousemove', handleTouchMove);
+      window.removeEventListener('mouseup', handleTouchEnd);
+      window.removeEventListener('touchmove', handleTouchMove);
+      window.removeEventListener('touchend', handleTouchEnd);
+    };
+  }, [isDraggingHeight, handleTouchMove, handleTouchEnd]);
+
   if (view === 'landing') {
     return (
       <>
@@ -412,7 +459,7 @@ export default function App() {
           <div className="flex-1 flex flex-col md:flex-row gap-4 md:gap-6 items-stretch min-h-0 md:overflow-hidden relative">
             
             {/* Live Preview Area - Order 1 (Top) on Mobile, Order 2 (Right) on PC */}
-            <div className="order-1 md:order-2 flex flex-col h-[400px] sm:h-[450px] md:h-auto md:flex-1 md:min-h-0 overflow-hidden relative shrink-0 z-20">
+            <div className="order-1 md:order-2 flex flex-col md:h-auto md:flex-1 md:min-h-0 overflow-hidden relative shrink-0 z-20" style={{ height: typeof window !== "undefined" && window.innerWidth < 768 ? `${mobilePreviewHeight}px` : undefined }}>
                <PreviewArea 
                  state={state} 
                  onStateChange={handleStateChange}
@@ -428,6 +475,15 @@ export default function App() {
                  onAddSnapshot={handleAddSnapshot}
                  onRandomize={handleRandomize}
                />
+
+               {/* Mobile Drag Handle */}
+               <div 
+                  className="md:hidden absolute bottom-0 left-0 right-0 h-6 flex items-center justify-center cursor-ns-resize bg-gradient-to-t from-[var(--root-bg)] to-transparent z-[100]"
+                  onMouseDown={handleTouchStart}
+                  onTouchStart={handleTouchStart}
+               >
+                 <div className="w-12 h-1.5 bg-white/30 backdrop-blur shadow-sm rounded-full pointer-events-none" />
+               </div>
             </div>
 
             {/* Properties Panel - Order 2 (Bottom) on Mobile, Order 1 (Left) on PC */}
