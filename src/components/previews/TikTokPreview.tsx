@@ -40,7 +40,7 @@ export function TikTokPreview({ state, onThemeToggle, onReplyClick, onEditReply 
         className="flex flex-col relative max-w-full mt-4 shadow-md"
         style={{
           ...bubbleStyle,
-          padding: `${state.padding ?? 16}px`,
+          padding: `${state.padding ?? 16}px 20px`,
           borderRadius: `${state.borderRadius ?? 12}px`,
           borderBottomLeftRadius: '0px',
           width: (state.autoWidth ?? true) ? 'fit-content' : `${replyWidth}px`,
@@ -51,17 +51,17 @@ export function TikTokPreview({ state, onThemeToggle, onReplyClick, onEditReply 
         <svg 
           className="absolute"
           style={{
-            bottom: '-19px',
-            left: '-12px',
+            bottom: '-14px',
+            left: '0px',
             color: bubbleBg,
           }}
           width="24"
-          height="20"
-          viewBox="0 0 24 20"
+          height="15"
+          viewBox="0 0 24 15"
           fill="none"
         >
           <path 
-            d="M 12 0 C 12 6, 8 12, 0 20 C 8 16, 16 10, 24 0 Z" 
+            d="M 0 0 V 15 C 4 10, 10 0, 24 0 Z" 
             fill="currentColor" 
           />
         </svg>
@@ -69,17 +69,17 @@ export function TikTokPreview({ state, onThemeToggle, onReplyClick, onEditReply 
         <div className="relative flex items-center w-full">
           {/* Avatar */}
           {state.avatarUrl && (
-            <img src={state.avatarUrl} alt="Avatar" className="w-[46px] h-[46px] rounded-full object-cover mr-3.5 bg-neutral-800 shrink-0" />
+            <img src={state.avatarUrl} alt="Avatar" className="w-[52px] h-[52px] rounded-full object-cover mr-4 bg-neutral-800 shrink-0" />
           )}
           
           {/* Content */}
           <div className="flex-1 min-w-0 flex flex-col justify-center">
-            <span className={`text-[13px] font-semibold ${(isReply && state.replyBubbleColor) ? 'text-white/80' : mutedText} truncate mb-0.5`}>
+            <span className={`text-[15px] font-medium ${(isReply && state.replyBubbleColor) ? 'text-white/80' : mutedText} truncate mb-0.5`}>
               Reply to {state.username}'s comment
             </span>
             <p 
-              className={`${textColorClass} leading-[1.3] font-bold text-left break-words whitespace-pre-wrap`}
-              style={{ fontSize: `${(state.fontSize || 15) + 3}px`, color: (isReply && state.replyBubbleColor) ? '#ffffff' : undefined }}
+              className={`${textColorClass} leading-[1.25] font-bold text-left break-words whitespace-pre-wrap`}
+              style={{ fontSize: `${(state.fontSize || 15) + 6}px`, color: (isReply && state.replyBubbleColor) ? '#ffffff' : undefined }}
             >
               {renderFormattedText(state.commentText)}
             </p>

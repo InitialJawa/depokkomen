@@ -175,6 +175,51 @@ export function Sidebar({
           </div>
         </div>
 
+        {/* TEMPLATE (Visible only for TikTok/Instagram) */}
+        {(state.platform === 'tiktok' || state.platform === 'instagram') && (
+          <div className="p-4.5 border-b border-[var(--panel-border)] flex flex-col gap-3">
+            {state.platform === 'tiktok' && (
+              <div>
+                <Label className="text-xs font-bold uppercase tracking-wider text-[var(--root-fg)] mb-2 block">Template TikTok</Label>
+                <div className="flex bg-[var(--root-bg)] border border-[var(--panel-border)] rounded-lg p-1">
+                  <button
+                    onClick={() => onChange({ tiktokTemplate: 'video' })}
+                    className={`flex-1 py-1.5 text-xs font-semibold rounded-md transition-all ${state.tiktokTemplate === 'video' ? 'bg-[var(--panel-bg)] shadow text-[var(--root-fg)]' : 'text-[var(--text-muted)] cursor-pointer hover:text-[var(--root-fg)]'}`}
+                  >
+                    Video Comment
+                  </button>
+                  <button
+                    onClick={() => onChange({ tiktokTemplate: 'reply' })}
+                    className={`flex-1 py-1.5 text-xs font-semibold rounded-md transition-all ${state.tiktokTemplate === 'reply' ? 'bg-[var(--panel-bg)] shadow text-[var(--root-fg)]' : 'text-[var(--text-muted)] cursor-pointer hover:text-[var(--root-fg)]'}`}
+                  >
+                    Reply Bubble
+                  </button>
+                </div>
+              </div>
+            )}
+            
+            {state.platform === 'instagram' && (
+              <div>
+                <Label className="text-xs font-bold uppercase tracking-wider text-[var(--root-fg)] mb-2 block">Template Instagram</Label>
+                <div className="flex bg-[var(--root-bg)] border border-[var(--panel-border)] rounded-lg p-1">
+                  <button
+                    onClick={() => onChange({ instagramTemplate: 'comment' })}
+                    className={`flex-1 py-1.5 text-xs font-semibold rounded-md transition-all ${state.instagramTemplate === 'comment' ? 'bg-[var(--panel-bg)] shadow text-[var(--root-fg)]' : 'text-[var(--text-muted)] cursor-pointer hover:text-[var(--root-fg)]'}`}
+                  >
+                    Post Comment
+                  </button>
+                  <button
+                    onClick={() => onChange({ instagramTemplate: 'live' })}
+                    className={`flex-1 py-1.5 text-xs font-semibold rounded-md transition-all ${state.instagramTemplate === 'live' ? 'bg-[var(--panel-bg)] shadow text-[var(--root-fg)]' : 'text-[var(--text-muted)] cursor-pointer hover:text-[var(--root-fg)]'}`}
+                  >
+                    Live Comment
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
         {/* AVATAR */}
         <div className="p-4.5 border-b border-[var(--panel-border)] flex flex-col gap-3">
           <Label className="text-xs font-bold uppercase tracking-wider text-[var(--root-fg)]">Avatar</Label>
@@ -407,45 +452,7 @@ export function Sidebar({
               </Select>
             </div>
 
-            {state.platform === 'tiktok' && (
-              <div>
-                <Label className="text-xs font-semibold mb-1.5 block">Template TikTok</Label>
-                <div className="flex bg-[var(--root-bg)] border border-[var(--panel-border)] rounded-lg p-1">
-                  <button
-                    onClick={() => onChange({ tiktokTemplate: 'video' })}
-                    className={`flex-1 py-1 text-[11px] font-semibold rounded-md transition-all ${state.tiktokTemplate === 'video' ? 'bg-[var(--panel-bg)] shadow text-[var(--root-fg)]' : 'text-[var(--text-muted)]'}`}
-                  >
-                    Video
-                  </button>
-                  <button
-                    onClick={() => onChange({ tiktokTemplate: 'reply' })}
-                    className={`flex-1 py-1 text-[11px] font-semibold rounded-md transition-all ${state.tiktokTemplate === 'reply' ? 'bg-[var(--panel-bg)] shadow text-[var(--root-fg)]' : 'text-[var(--text-muted)]'}`}
-                  >
-                    Reply Bubble
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {state.platform === 'instagram' && (
-              <div>
-                <Label className="text-xs font-semibold mb-1.5 block">Template Instagram</Label>
-                <div className="flex bg-[var(--root-bg)] border border-[var(--panel-border)] rounded-lg p-1">
-                  <button
-                    onClick={() => onChange({ instagramTemplate: 'comment' })}
-                    className={`flex-1 py-1 text-[11px] font-semibold rounded-md transition-all ${state.instagramTemplate === 'comment' ? 'bg-[var(--panel-bg)] shadow text-[var(--root-fg)]' : 'text-[var(--text-muted)]'}`}
-                  >
-                    Comment
-                  </button>
-                  <button
-                    onClick={() => onChange({ instagramTemplate: 'live' })}
-                    className={`flex-1 py-1 text-[11px] font-semibold rounded-md transition-all ${state.instagramTemplate === 'live' ? 'bg-[var(--panel-bg)] shadow text-[var(--root-fg)]' : 'text-[var(--text-muted)]'}`}
-                  >
-                    Live
-                  </button>
-                </div>
-              </div>
-            )}
+            {/* Removed nested template selector */}
 
             {/* NESTED REPLIES */}
             <div className="border-t border-[var(--panel-border)] pt-4 mt-1">

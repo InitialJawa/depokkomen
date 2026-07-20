@@ -228,6 +228,12 @@ export default function App() {
   const handleStateChange = (updates: Partial<typeof defaultState>) => {
     setState(prev => {
       const newState = { ...prev, ...updates };
+      
+      // If changing platform to kick_live, default to dark theme
+      if (updates.platform === 'kick_live' && prev.platform !== 'kick_live') {
+        newState.theme = 'dark';
+      }
+
       if (JSON.stringify(prev) !== JSON.stringify(newState)) {
         setPast(p => [...p, prev]);
         setFuture([]); // clear redo on new action
@@ -351,33 +357,10 @@ export default function App() {
           </div>
           
           {/* Split view panels */}
-          <div className="flex-1 flex flex-col lg:flex-row gap-6 items-stretch min-h-0 overflow-hidden relative">
+          <div className="flex-1 flex flex-col lg:flex-row gap-4 lg:gap-6 items-stretch min-h-0 overflow-hidden relative">
             
-            {/* Properties Panel */}
-            <Sidebar 
-              state={state} 
-              onChange={handleStateChange}
-              onRandomize={handleRandomize}
-              onReset={handleReset}
-              isPremium={isPremium}
-              exportCount={exportCount}
-              onUpgradeClick={() => setShowUpgradeModal(true)}
-              drafts={drafts}
-              history={history}
-              onSaveDraft={handleSaveDraft}
-              onDeleteDraft={handleDeleteDraft}
-              onRenameDraft={handleRenameDraft}
-              onClearHistory={handleClearHistory}
-              onEditReply={(id) => { setActiveReplyEditId(id); setIsAddingReply(false); }}
-              onAddReply={() => { setIsAddingReply(true); setActiveReplyEditId(null); }}
-              onUndo={handleUndo}
-              onRedo={handleRedo}
-              canUndo={past.length > 0}
-              canRedo={future.length > 0}
-            />
-            
-            {/* Live Preview Area */}
-            <div className="flex-1 flex flex-col min-h-[500px] lg:min-h-0 overflow-hidden relative">
+            {/* Live Preview Area - Order 1 (Top) on Mobile, Order 2 (Right) on PC */}
+            <div className="order-1 lg:order-2 flex flex-col h-[45vh] lg:h-auto lg:flex-1 min-h-[320px] lg:min-h-0 overflow-hidden relative shrink-0 z-20">
                <PreviewArea 
                  state={state} 
                  onStateChange={handleStateChange}
@@ -392,6 +375,32 @@ export default function App() {
                  setIsAddingNew={setIsAddingReply}
                />
             </div>
+
+            {/* Properties Panel - Order 2 (Bottom) on Mobile, Order 1 (Left) on PC */}
+            <div className="order-2 lg:order-1 flex-1 lg:flex-none lg:w-[365px] flex flex-col min-h-0 overflow-hidden z-10">
+              <Sidebar 
+                state={state} 
+                onChange={handleStateChange}
+                onRandomize={handleRandomize}
+                onReset={handleReset}
+                isPremium={isPremium}
+                exportCount={exportCount}
+                onUpgradeClick={() => setShowUpgradeModal(true)}
+                drafts={drafts}
+                history={history}
+                onSaveDraft={handleSaveDraft}
+                onDeleteDraft={handleDeleteDraft}
+                onRenameDraft={handleRenameDraft}
+                onClearHistory={handleClearHistory}
+                onEditReply={(id) => { setActiveReplyEditId(id); setIsAddingReply(false); }}
+                onAddReply={() => { setIsAddingReply(true); setActiveReplyEditId(null); }}
+                onUndo={handleUndo}
+                onRedo={handleRedo}
+                canUndo={past.length > 0}
+                canRedo={future.length > 0}
+              />
+            </div>
+            
           </div>
         </main>
 

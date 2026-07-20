@@ -400,16 +400,18 @@ export function PreviewArea({
       <div 
         ref={containerRef}
         className={`flex-1 relative overflow-hidden flex items-center justify-center cursor-grab active:cursor-grabbing transition-all duration-300 ${
-          bgStyle === 'checkerboard' 
-            ? 'bg-checkerboard' 
-            : bgStyle === 'solid' 
-              ? 'bg-[var(--root-bg)]' 
-              : bgStyle === 'gradient'
-                ? (state.theme === 'dark' 
-                    ? 'bg-gradient-to-tr from-[#020617] via-[#0f172a] to-[#1e1b4b]' 
-                    : 'bg-gradient-to-tr from-[#e0e7ff] via-[#fae8ff] to-[#fce7f3]')
-                : 'bg-transparent'
+          bgStyle === 'solid' 
+            ? 'bg-[var(--root-bg)]' 
+            : bgStyle === 'gradient'
+              ? 'bg-gradient-to-br from-[#111827] via-[#312e81] to-[#0f172a]'
+              : ''
         }`}
+        style={bgStyle === 'transparent' ? {
+          backgroundColor: '#ffffff',
+          backgroundImage: 'repeating-linear-gradient(45deg, #e5e5e5 25%, transparent 25%, transparent 75%, #e5e5e5 75%, #e5e5e5), repeating-linear-gradient(45deg, #e5e5e5 25%, #ffffff 25%, #ffffff 75%, #e5e5e5 75%, #e5e5e5)',
+          backgroundPosition: '0 0, 10px 10px',
+          backgroundSize: '20px 20px'
+        } : {}}
       >
         {/* Figma like checkerboard via CSS class or inline style */}
         {bgStyle === 'checkerboard' && (

@@ -48,13 +48,13 @@ export function KickLivePreview({ state, onThemeToggle, onReplyClick, onEditRepl
       <div 
         key={comment.id || 'main'} 
         onClick={() => !isMain && onEditReply?.(comment.id)}
-        className={`px-3 py-1.5 flex items-start w-full transition-colors ${
+        className={`px-3 py-1.5 w-full transition-colors ${
           !isMain ? 'cursor-pointer hover:bg-neutral-500/10 rounded-lg' : ''
         }`}
         title={!isMain ? "Klik untuk edit / hapus komentar ini" : undefined}
       >
-        <div className="flex-1 min-w-0 leading-relaxed font-semibold flex flex-wrap items-center">
-          <div className="inline-flex items-center align-middle mr-1.5 gap-1 shrink-0 mt-0.5">
+        <div className="leading-relaxed font-semibold text-left">
+          <span className="inline-flex items-center align-middle mr-1.5 gap-1 relative -top-[1px]">
             {comment.avatarUrl && !comment.avatarUrl.includes('avatars.githubusercontent.com') && (
               <img src={comment.avatarUrl} className="w-[14px] h-[14px] rounded-sm object-cover shrink-0" alt="badge" />
             )}
@@ -76,12 +76,12 @@ export function KickLivePreview({ state, onThemeToggle, onReplyClick, onEditRepl
                  <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
               </svg>
             )}
-          </div>
-          <span className="mr-0.5" style={{ color }}>
+          </span>
+          <span className="font-bold mr-0.5" style={{ color }}>
             {comment.username}
           </span>
-          <span className={`${textColor} opacity-60 mr-1.5`}> : </span>
-          <span className={`${textColor} break-words whitespace-pre-wrap font-medium opacity-90`} style={{ fontSize: `${state.fontSize || 14}px` }}>
+          <span className={`${textColor} opacity-60 font-bold mr-1.5`}>:</span>
+          <span className={`${textColor} break-words whitespace-pre-wrap font-medium`} style={{ fontSize: `${state.fontSize || 14}px` }}>
             {renderFormattedText(comment.commentText)}
           </span>
         </div>
